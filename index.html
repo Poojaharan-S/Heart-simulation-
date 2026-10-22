@@ -1,451 +1,824 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Human Heart 3D Simulation</title>
+  <title>Human Heart Anatomy | 3D Learning Project</title>
 
-<script src="https://static.sketchfab.com/api/sketchfab-viewer-1.12.1.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-<style>
-* {
-    box-sizing: border-box;
-}
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #0b1120;
+      color: #f8fafc;
+      line-height: 1.6;
+    }
 
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #081321;
-    color: #ffffff;
-}
-
-header {
-    text-align: center;
-    padding: 22px 12px;
-    background: #101f33;
-}
-
-header h1 {
-    margin: 0 0 8px;
-    font-size: 28px;
-}
-
-header p {
-    margin: 0;
-    color: #b8c9dd;
-}
-
-main {
-    max-width: 1000px;
-    margin: auto;
-    padding: 12px;
-}
-
-.card {
-    margin-bottom: 16px;
-    padding: 16px;
-    background: #101f33;
-    border: 1px solid #29415d;
-    border-radius: 12px;
-}
-
-.viewer {
-    width: 100%;
-    height: 500px;
-    position: relative;
-    background: #050a12;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-}
-
-#loading {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    text-align: center;
-    color: #ffffff;
-    background: #050a12;
-}
-
-.instructions {
-    color: #b8c9dd;
-    font-size: 14px;
-    line-height: 1.6;
-}
-
-button {
-    padding: 10px 12px;
-    margin: 4px;
-    border: 1px solid #477294;
-    border-radius: 8px;
-    background: #18344e;
-    color: white;
-    cursor: pointer;
-}
-
-button.active,
-button:hover {
-    background: #087ca5;
-    border-color: #65d5ff;
-}
-
-#status {
-    color: #aee7ff;
-    line-height: 1.5;
-}
-
-.structure {
-    padding: 12px;
-    margin: 8px 0;
-    background: #0a1727;
-    border: 1px solid #29415d;
-    border-radius: 8px;
-}
-
-.structure strong {
-    color: #65d5ff;
-}
-
-.flow {
-    line-height: 1.9;
-    color: #dcecff;
-}
-
-@media (max-width: 600px) {
-    .viewer {
-        height: 430px;
+    header {
+      padding: 28px 16px;
+      text-align: center;
+      background: linear-gradient(135deg, #991b1b, #1e3a8a);
     }
 
     header h1 {
-        font-size: 23px;
+      margin: 0 0 8px;
+      font-size: clamp(25px, 5vw, 38px);
     }
-}
-</style>
+
+    header p {
+      margin: 0;
+      color: #e2e8f0;
+    }
+
+    main {
+      width: min(1100px, 94%);
+      margin: 24px auto;
+    }
+
+    section {
+      margin-bottom: 25px;
+      padding: 20px;
+      background: #172033;
+      border: 1px solid #334155;
+      border-radius: 16px;
+    }
+
+    h2 {
+      margin-top: 0;
+      color: #fda4af;
+    }
+
+    .intro {
+      text-align: center;
+    }
+
+    .model-frame {
+      width: 100%;
+      height: 480px;
+      border: 0;
+      border-radius: 12px;
+      background: #111827;
+    }
+
+    .note {
+      color: #cbd5e1;
+      font-size: 14px;
+    }
+
+    .legend {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin: 12px 0;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .dot {
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .blue {
+      background: #38bdf8;
+    }
+
+    .red {
+      background: #fb4b5b;
+    }
+
+    .diagram-wrap {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      min-width: 310px;
+      max-width: 760px;
+      height: auto;
+      margin: 0 auto;
+      background: #0b1220;
+      border-radius: 12px;
+    }
+
+    .vessel {
+      fill: none;
+      stroke-width: 12;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .blue-path {
+      stroke: #38bdf8;
+    }
+
+    .red-path {
+      stroke: #fb4b5b;
+    }
+
+    .chamber {
+      stroke: #e2e8f0;
+      stroke-width: 1.5;
+    }
+
+    .blue-chamber {
+      fill: #075985;
+    }
+
+    .red-chamber {
+      fill: #991b1b;
+    }
+
+    .label {
+      fill: #f8fafc;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .small-label {
+      fill: #cbd5e1;
+      font-size: 10px;
+    }
+
+    .particle {
+      stroke: #ffffff;
+      stroke-width: 1;
+    }
+
+    .blue-particle {
+      fill: #7dd3fc;
+    }
+
+    .red-particle {
+      fill: #fca5a5;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 18px 0;
+    }
+
+    button {
+      border: 0;
+      border-radius: 9px;
+      padding: 11px 18px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+      background: #2563eb;
+    }
+
+    button:hover {
+      filter: brightness(1.15);
+    }
+
+    button:focus-visible {
+      outline: 3px solid #facc15;
+      outline-offset: 3px;
+    }
+
+    #pauseButton {
+      background: #475569;
+    }
+
+    #stage {
+      text-align: center;
+      padding: 15px;
+      border-radius: 10px;
+      background: #0b1220;
+      min-height: 85px;
+    }
+
+    .parts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+    }
+
+    .part {
+      padding: 14px;
+      background: #0b1220;
+      border-radius: 10px;
+      border-left: 4px solid #fb7185;
+    }
+
+    .part h3 {
+      margin: 0 0 5px;
+      font-size: 17px;
+    }
+
+    .part p {
+      margin: 0;
+      color: #cbd5e1;
+      font-size: 14px;
+    }
+
+    .blue-text {
+      color: #7dd3fc;
+    }
+
+    .red-text {
+      color: #fca5a5;
+    }
+
+    footer {
+      text-align: center;
+      padding: 22px 12px;
+      color: #94a3b8;
+      font-size: 13px;
+    }
+
+    @media (max-width: 600px) {
+      main {
+        width: 94%;
+        margin: 14px auto;
+      }
+
+      section {
+        padding: 14px;
+      }
+
+      .model-frame {
+        height: 360px;
+      }
+
+      header {
+        padding: 22px 12px;
+      }
+
+      button {
+        padding: 10px 14px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .particle {
+        display: none;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<header>
-    <h1>Human Heart — 3D Simulation</h1>
-    <p>Explore the human heart and understand blood circulation.</p>
-</header>
+  <header>
+    <h1>🫀 Human Heart Anatomy</h1>
+    <p>An Interactive 3D Model and Blood Circulation Project</p>
+  </header>
 
-<main>
+  <main>
 
-    <section class="card">
-        <h2>Interactive 3D Human Heart</h2>
+    <section class="intro">
+      <h2>Welcome to the Human Heart</h2>
 
-        <p class="instructions">
-            Drag to rotate the heart and use pinch or scroll gestures to zoom.
-        </p>
+      <p>
+        Explore the structure of the human heart and learn how blood
+        travels through the lungs and the rest of the body.
+      </p>
 
-        <div class="viewer">
-
-            <iframe
-                id="heartFrame"
-                title="Realistic 3D Human Heart"
-                src="https://sketchfab.com/models/5da08bb137014f0392c69f9997f777cd/embed?autostart=1&preload=1&ui_theme=dark"
-                allow="autoplay; fullscreen; xr-spatial-tracking"
-                allowfullscreen>
-            </iframe>
-
-            <div id="loading">
-                Loading the 3D heart model...
-            </div>
-
-        </div>
+      <p class="note">
+        Blue represents blood that is low in oxygen.
+        Red represents blood that is rich in oxygen.
+      </p>
     </section>
 
-    <section class="card">
-        <h2>Place Anatomical Labels</h2>
+    <section>
+      <h2>1. Explore the 3D Heart Model</h2>
 
-        <p class="instructions">
-            Select a structure below, then tap the corresponding point on
-            the heart. The label will be attached to the selected 3D position
-            if the model and Viewer API support annotation placement.
-        </p>
+      <p>
+        Rotate the model, zoom in, and explore the heart from different angles.
+      </p>
 
-        <div id="buttons"></div>
+      <iframe
+        class="model-frame"
+        title="Interactive 3D anatomical human heart model"
+        src="https://sketchfab.com/models/5da08bb137014f0392c69f9997f777cd/embed?autostart=1&ui_theme=dark&ui_infos=0"
+        allow="autoplay; fullscreen; xr-spatial-tracking"
+        allowfullscreen
+        loading="lazy">
+      </iframe>
 
-        <p id="status">
-            Loading the viewer...
-        </p>
-
-        <button id="cancel">Cancel Selection</button>
-        <button id="clear">Remove Labels</button>
-        <button id="export">Export Coordinates</button>
+      <p class="note">
+        The 3D model requires an internet connection. If it does not appear,
+        open the page in a browser and check your internet connection.
+      </p>
     </section>
 
-    <section class="card">
-        <h2>Anatomical Structures</h2>
+    <section>
+      <h2>2. Animated Blood Circulation</h2>
 
-        <div class="structure">
-            <strong>Aorta</strong>
-            <p>Carries oxygen-rich blood from the left ventricle to the body.</p>
-        </div>
+      <p>
+        Follow the animated particles to understand how blood moves through
+        the heart, lungs, and body.
+      </p>
 
-        <div class="structure">
-            <strong>Superior Vena Cava</strong>
-            <p>Returns oxygen-poor blood from the upper body to the right atrium.</p>
-        </div>
+      <div class="legend">
+        <span><i class="dot blue"></i> Low-oxygen blood</span>
+        <span><i class="dot red"></i> Oxygen-rich blood</span>
+      </div>
 
-        <div class="structure">
-            <strong>Inferior Vena Cava</strong>
-            <p>Returns oxygen-poor blood from the lower body to the right atrium.</p>
-        </div>
+      <div class="diagram-wrap">
+        <svg
+          id="circulationDiagram"
+          viewBox="0 0 600 440"
+          role="img"
+          aria-label="Diagram of blood circulation through the heart, lungs, and body">
 
-        <div class="structure">
-            <strong>Pulmonary Artery</strong>
-            <p>Carries oxygen-poor blood from the right ventricle to the lungs.</p>
-        </div>
+          <defs>
+            <marker
+              id="blueArrow"
+              markerWidth="8"
+              markerHeight="8"
+              refX="5"
+              refY="3"
+              orient="auto">
+              <path d="M0,0 L0,6 L6,3 z" fill="#38bdf8"/>
+            </marker>
 
-        <div class="structure">
-            <strong>Pulmonary Veins</strong>
-            <p>Carry oxygen-rich blood from the lungs to the left atrium.</p>
-        </div>
+            <marker
+              id="redArrow"
+              markerWidth="8"
+              markerHeight="8"
+              refX="5"
+              refY="3"
+              orient="auto">
+              <path d="M0,0 L0,6 L6,3 z" fill="#fb4b5b"/>
+            </marker>
+          </defs>
 
-        <div class="structure">
-            <strong>Right Atrium</strong>
-            <p>Receives oxygen-poor blood returning from the body.</p>
-        </div>
+          <!-- Main circulation pathways -->
 
-        <div class="structure">
-            <strong>Right Ventricle</strong>
-            <p>Pumps oxygen-poor blood toward the lungs.</p>
-        </div>
+          <!-- Body to right atrium -->
+          <path
+            class="vessel blue-path"
+            d="M 110 105 L 110 155 L 205 155"
+            marker-end="url(#blueArrow)"/>
 
-        <div class="structure">
-            <strong>Left Atrium</strong>
-            <p>Receives oxygen-rich blood from the lungs.</p>
-        </div>
+          <!-- Right atrium to right ventricle -->
+          <path
+            class="vessel blue-path"
+            d="M 245 175 L 245 250"
+            marker-end="url(#blueArrow)"/>
 
-        <div class="structure">
-            <strong>Left Ventricle</strong>
-            <p>Pumps oxygen-rich blood into the aorta.</p>
-        </div>
+          <!-- Right ventricle to lungs -->
+          <path
+            class="vessel blue-path"
+            d="M 275 285 L 330 285 L 330 115 L 385 115"
+            marker-end="url(#blueArrow)"/>
 
-        <div class="structure">
-            <strong>Septum</strong>
-            <p>Separates the right and left sides of the heart.</p>
-        </div>
+          <!-- Lungs to left atrium -->
+          <path
+            class="vessel red-path"
+            d="M 430 145 L 430 175 L 395 175"
+            marker-end="url(#redArrow)"/>
+
+          <!-- Left atrium to left ventricle -->
+          <path
+            class="vessel red-path"
+            d="M 355 195 L 355 250"
+            marker-end="url(#redArrow)"/>
+
+          <!-- Left ventricle to body -->
+          <path
+            class="vessel red-path"
+            d="M 385 285 L 500 285 L 500 105"
+            marker-end="url(#redArrow)"/>
+
+          <!-- Body -->
+          <rect
+            x="45" y="35" width="130" height="70" rx="15"
+            fill="#334155" stroke="#94a3b8"/>
+
+          <text x="110" y="64" text-anchor="middle" class="label">
+            BODY
+          </text>
+
+          <text x="110" y="82" text-anchor="middle" class="small-label">
+            Oxygen is used
+          </text>
+
+          <!-- Lungs -->
+          <rect
+            x="365" y="35" width="130" height="80" rx="15"
+            fill="#334155" stroke="#94a3b8"/>
+
+          <text x="430" y="65" text-anchor="middle" class="label">
+            LUNGS
+          </text>
+
+          <text x="430" y="83" text-anchor="middle" class="small-label">
+            Oxygen enters blood
+          </text>
+
+          <!-- Four heart chambers -->
+          <rect
+            x="190" y="145" width="95" height="65" rx="15"
+            class="chamber blue-chamber"/>
+
+          <text x="237" y="172" text-anchor="middle" class="label">
+            Right atrium
+          </text>
+
+          <text x="237" y="190" text-anchor="middle" class="small-label">
+            Receives blood
+          </text>
+
+          <rect
+            x="190" y="245" width="95" height="65" rx="15"
+            class="chamber blue-chamber"/>
+
+          <text x="237" y="272" text-anchor="middle" class="label">
+            Right ventricle
+          </text>
+
+          <text x="237" y="290" text-anchor="middle" class="small-label">
+            Pumps to lungs
+          </text>
+
+          <rect
+            x="310" y="145" width="95" height="65" rx="15"
+            class="chamber red-chamber"/>
+
+          <text x="357" y="172" text-anchor="middle" class="label">
+            Left atrium
+          </text>
+
+          <text x="357" y="190" text-anchor="middle" class="small-label">
+            Receives blood
+          </text>
+
+          <rect
+            x="310" y="245" width="95" height="65" rx="15"
+            class="chamber red-chamber"/>
+
+          <text x="357" y="272" text-anchor="middle" class="label">
+            Left ventricle
+          </text>
+
+          <text x="357" y="290" text-anchor="middle" class="small-label">
+            Pumps to body
+          </text>
+
+          <!-- Pathway labels -->
+          <text x="60" y="132" class="small-label">
+            Venae cavae
+          </text>
+
+          <text x="292" y="330" text-anchor="middle" class="small-label">
+            Pulmonary artery carries low-oxygen blood to lungs
+          </text>
+
+          <text x="430" y="155" text-anchor="middle" class="small-label">
+            Pulmonary veins
+          </text>
+
+          <text x="500" y="132" text-anchor="middle" class="small-label">
+            Aorta
+          </text>
+
+          <text x="300" y="390" text-anchor="middle" class="label">
+            Follow the moving particles
+          </text>
+
+          <text x="300" y="410" text-anchor="middle" class="small-label">
+            Blood circulates continuously through the body and lungs.
+          </text>
+
+          <!-- Animated particles -->
+          <circle r="7" class="particle blue-particle">
+            <animateMotion
+              dur="4s"
+              repeatCount="indefinite"
+              path="M 110 105 L 110 155 L 205 155"/>
+          </circle>
+
+          <circle r="7" class="particle blue-particle">
+            <animateMotion
+              dur="4s"
+              begin="-1s"
+              repeatCount="indefinite"
+              path="M 245 175 L 245 250"/>
+          </circle>
+
+          <circle r="7" class="particle blue-particle">
+            <animateMotion
+              dur="5s"
+              begin="-2s"
+              repeatCount="indefinite"
+              path="M 275 285 L 330 285 L 330 115 L 385 115"/>
+          </circle>
+
+          <circle r="7" class="particle red-particle">
+            <animateMotion
+              dur="4s"
+              repeatCount="indefinite"
+              path="M 430 145 L 430 175 L 395 175"/>
+          </circle>
+
+          <circle r="7" class="particle red-particle">
+            <animateMotion
+              dur="4s"
+              begin="-1s"
+              repeatCount="indefinite"
+              path="M 355 195 L 355 250"/>
+          </circle>
+
+          <circle r="7" class="particle red-particle">
+            <animateMotion
+              dur="5s"
+              begin="-2s"
+              repeatCount="indefinite"
+              path="M 385 285 L 500 285 L 500 105"/>
+          </circle>
+
+        </svg>
+      </div>
+
+      <div class="controls">
+        <button id="pauseButton" type="button">
+          ⏸ Pause Animation
+        </button>
+
+        <button id="restartButton" type="button">
+          ↻ Restart Animation
+        </button>
+      </div>
+
+      <div id="stage" aria-live="polite">
+        <strong>Blood circulation:</strong>
+        The heart continuously pumps blood through the lungs and body.
+      </div>
     </section>
 
-    <section class="card">
-        <h2>Blood Circulation Pathway</h2>
+    <section>
+      <h2>3. Important Parts of the Heart</h2>
 
-        <div class="flow">
-            Body → Superior and Inferior Vena Cava → Right Atrium
-            → Right Ventricle → Pulmonary Artery → Lungs
-            → Pulmonary Veins → Left Atrium → Left Ventricle
-            → Aorta → Body
+      <div class="parts-grid">
+
+        <div class="part">
+          <h3>Superior vena cava</h3>
+          <p>
+            Carries low-oxygen blood from the upper body to the right atrium.
+          </p>
         </div>
+
+        <div class="part">
+          <h3>Inferior vena cava</h3>
+          <p>
+            Carries low-oxygen blood from the lower body to the right atrium.
+          </p>
+        </div>
+
+        <div class="part">
+          <h3>Right atrium</h3>
+          <p>
+            Receives low-oxygen blood returning from the body.
+          </p>
+        </div>
+
+        <div class="part">
+          <h3>Right ventricle</h3>
+          <p>
+            Pumps low-oxygen blood to the lungs through the pulmonary artery.
+          </p>
+        </div>
+
+        <div class="part">
+          <h3>Pulmonary artery</h3>
+          <p>
+            Carries low-oxygen blood from the right ventricle to the lungs.
+          </p>
+        </div>
+
+        <div class="part">
+          <h3>Pulmonary veins</h3>
+          <p>
+            Carry oxygen-rich blood from the lungs to the left atrium.
+          </p>
+        </div>
+
+        <div class="part">
+          <h3>Left atrium</h3>
+          <p>
+            Receives oxygen-rich blood returning from the lungs.
+          </p>
+        </div>
+
+        <div class="part">
+          <h3>Left ventricle</h3>
+          <p>
+            Pumps oxygen-rich blood into the aorta and out to the body.
+          </p>
+        </div>
+
+        <div class="part">
+          <h3>Aorta</h3>
+          <p>
+            The main artery carrying oxygen-rich blood from the left ventricle
+            to the body.
+          </p>
+        </div>
+
+        <div class="part">
+          <h3>Septum</h3>
+          <p>
+            The wall that separates the right and left sides of the heart.
+          </p>
+        </div>
+
+        <div class="part">
+          <h3>Heart valves</h3>
+          <p>
+            Help keep blood flowing in the correct direction through the heart.
+          </p>
+        </div>
+
+        <div class="part">
+          <h3>Capillaries</h3>
+          <p>
+            Tiny blood vessels where oxygen and other substances are exchanged
+            with body tissues.
+          </p>
+        </div>
+
+      </div>
     </section>
 
-</main>
+    <section>
+      <h2>4. How Blood Circulates</h2>
 
-<script>
-(function () {
+      <ol>
+        <li>
+          Blood low in oxygen returns from the body through the superior and
+          inferior venae cavae to the right atrium.
+        </li>
 
-    const MODEL_UID = "5da08bb137014f0392c69f9997f777cd";
+        <li>
+          Blood passes through the tricuspid valve into the right ventricle.
+        </li>
 
-    const structures = [
-        ["Aorta", "Carries oxygen-rich blood to the body."],
-        ["Superior Vena Cava", "Returns blood from the upper body."],
-        ["Inferior Vena Cava", "Returns blood from the lower body."],
-        ["Pulmonary Artery", "Carries blood from the heart to the lungs."],
-        ["Pulmonary Veins", "Return oxygen-rich blood from the lungs."],
-        ["Right Atrium", "Receives oxygen-poor blood."],
-        ["Right Ventricle", "Pumps blood toward the lungs."],
-        ["Left Atrium", "Receives oxygen-rich blood."],
-        ["Left Ventricle", "Pumps blood into the aorta."],
-        ["Septum", "Separates the two sides of the heart."]
+        <li>
+          The right ventricle pumps blood through the pulmonary valve and
+          pulmonary artery to the lungs.
+        </li>
+
+        <li>
+          In the lungs, blood releases carbon dioxide and receives oxygen.
+        </li>
+
+        <li>
+          Oxygen-rich blood returns through the pulmonary veins to the left atrium.
+        </li>
+
+        <li>
+          Blood passes through the mitral valve into the left ventricle.
+        </li>
+
+        <li>
+          The left ventricle pumps blood through the aortic valve and aorta
+          to the rest of the body.
+        </li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>5. Did You Know?</h2>
+
+      <ul>
+        <li>The human heart has four chambers.</li>
+        <li>The right side sends blood to the lungs.</li>
+        <li>The left side sends blood to the rest of the body.</li>
+        <li>Heart valves help prevent blood from flowing backward.</li>
+        <li>The heart is made of specialized cardiac muscle.</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <footer>
+    Human Heart Anatomy Project | Interactive Biology Learning
+  </footer>
+
+  <script>
+    const svg = document.getElementById("circulationDiagram");
+    const pauseButton = document.getElementById("pauseButton");
+    const restartButton = document.getElementById("restartButton");
+    const stage = document.getElementById("stage");
+
+    const stages = [
+      "Step 1: Blood low in oxygen returns from the body to the right atrium through the venae cavae.",
+      "Step 2: Blood moves from the right atrium into the right ventricle.",
+      "Step 3: The right ventricle pumps blood through the pulmonary artery to the lungs.",
+      "Step 4: In the lungs, blood releases carbon dioxide and receives oxygen.",
+      "Step 5: Oxygen-rich blood returns through the pulmonary veins to the left atrium.",
+      "Step 6: Blood moves into the left ventricle, which pumps it through the aorta to the body."
     ];
 
-    const frame = document.getElementById("heartFrame");
-    const loading = document.getElementById("loading");
-    const status = document.getElementById("status");
-    const buttons = document.getElementById("buttons");
+    let paused = false;
+    let currentStage = 0;
+    let stageTimer = null;
 
-    let api = null;
-    let selected = null;
-    let placed = [];
+    function updateStage() {
+      stage.innerHTML =
+        "<strong>" +
+        stages[currentStage] +
+        "</strong>";
 
-    structures.forEach(function (part) {
-        const button = document.createElement("button");
-
-        button.textContent = part[0];
-        button.type = "button";
-
-        button.addEventListener("click", function () {
-            if (!api) {
-                status.textContent =
-                    "The annotation API is not initialized. The 3D embed may still work.";
-                return;
-            }
-
-            selected = {
-                name: part[0],
-                description: part[1]
-            };
-
-            buttons.querySelectorAll("button").forEach(function (b) {
-                b.classList.toggle("active", b === button);
-            });
-
-            status.textContent =
-                "Selected " + part[0] +
-                ". Tap the matching point on the heart.";
-        });
-
-        buttons.appendChild(button);
-    });
-
-    document.getElementById("cancel").addEventListener("click", function () {
-        selected = null;
-
-        buttons.querySelectorAll("button").forEach(function (b) {
-            b.classList.remove("active");
-        });
-
-        status.textContent = "Selection cancelled.";
-    });
-
-    document.getElementById("clear").addEventListener("click", function () {
-        if (!api) return;
-
-        api.removeAllAnnotations(function (error) {
-            if (error) {
-                status.textContent = "Could not remove the annotations.";
-                return;
-            }
-
-            placed = [];
-            selected = null;
-            status.textContent = "Annotations removed.";
-        });
-    });
-
-    document.getElementById("export").addEventListener("click", function () {
-        if (placed.length === 0) {
-            status.textContent = "Place at least one label before exporting.";
-            return;
-        }
-
-        const blob = new Blob(
-            [JSON.stringify(placed, null, 2)],
-            { type: "application/json" }
-        );
-
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-
-        link.href = url;
-        link.download = "heart-label-coordinates.json";
-        link.click();
-
-        URL.revokeObjectURL(url);
-    });
-
-    if (!window.Sketchfab) {
-        status.textContent =
-            "The Sketchfab API did not load. Check your internet connection.";
-        return;
+      currentStage = (currentStage + 1) % stages.length;
     }
 
-    const client = new Sketchfab("1.12.1", frame);
+    function startStageTimer() {
+      clearInterval(stageTimer);
 
-    client.init(MODEL_UID, {
-        autostart: 1,
-        preload: 1,
-        ui_theme: "dark",
-
-        success: function (viewerApi) {
-            api = viewerApi;
-
-            api.start(function () {
-                status.textContent = "Starting the 3D viewer...";
-            });
-
-            api.addEventListener("viewerready", function () {
-                loading.style.display = "none";
-
-                status.textContent =
-                    "Viewer ready. Select a structure and tap the model to place its label.";
-
-                api.addEventListener("click", function (info) {
-                    if (!selected) return;
-
-                    if (!info || !info.position3D) {
-                        status.textContent =
-                            "No surface position received. Tap directly on the heart.";
-                        return;
-                    }
-
-                    const part = selected;
-
-                    api.getCameraLookAt(function (error, camera) {
-                        if (error || !camera) {
-                            status.textContent =
-                                "Unable to get the camera position.";
-                            return;
-                        }
-
-                        api.createAnnotationFromScenePosition(
-                            info.position3D,
-                            camera.position,
-                            camera.target,
-                            part.name,
-                            part.description,
-                            function (annotationError) {
-                                if (annotationError) {
-                                    status.textContent =
-                                        "Annotation failed. Check the Viewer API and model support.";
-                                    return;
-                                }
-
-                                placed.push({
-                                    name: part.name,
-                                    description: part.description,
-                                    position: info.position3D,
-                                    cameraPosition: camera.position,
-                                    cameraTarget: camera.target
-                                });
-
-                                selected = null;
-
-                                buttons.querySelectorAll("button").forEach(function (b) {
-                                    b.classList.remove("active");
-                                });
-
-                                status.textContent =
-                                    part.name + " label added.";
-                            }
-                        );
-                    });
-                }, { pick: "slow" });
-            });
-        },
-
-        error: function () {
-            status.textContent =
-                "The Viewer API could not initialize. The standard model embed may still work.";
-            loading.textContent =
-                "The interactive API did not initialize. Try refreshing the page.";
+      stageTimer = setInterval(() => {
+        if (!paused) {
+          updateStage();
         }
+      }, 4000);
+    }
+
+    function pauseAnimation() {
+      if (paused) {
+        return;
+      }
+
+      paused = true;
+
+      if (typeof svg.pauseAnimations === "function") {
+        svg.pauseAnimations();
+      }
+
+      pauseButton.textContent = "▶ Resume Animation";
+      stage.innerHTML = "<strong>Animation paused.</strong> Press Resume to continue.";
+    }
+
+    function resumeAnimation() {
+      if (!paused) {
+        return;
+      }
+
+      paused = false;
+
+      if (typeof svg.unpauseAnimations === "function") {
+        svg.unpauseAnimations();
+      }
+
+      pauseButton.textContent = "⏸ Pause Animation";
+
+      stage.innerHTML = "<strong>" + stages[currentStage] + "</strong>";
+    }
+
+    function restartAnimation() {
+      paused = false;
+      currentStage = 0;
+
+      if (typeof svg.setCurrentTime === "function") {
+        svg.setCurrentTime(0);
+      }
+
+      if (typeof svg.unpauseAnimations === "function") {
+        svg.unpauseAnimations();
+      }
+
+      pauseButton.textContent = "⏸ Pause Animation";
+      stage.innerHTML = "<strong>" + stages[0] + "</strong>";
+
+      currentStage = 1;
+      startStageTimer();
+    }
+
+    pauseButton.addEventListener("click", () => {
+      if (paused) {
+        resumeAnimation();
+      } else {
+        pauseAnimation();
+      }
     });
 
-})();
-</script>
+    restartButton.addEventListener("click", restartAnimation);
+
+    stage.innerHTML = "<strong>" + stages[0] + "</strong>";
+    currentStage = 1;
+    startStageTimer();
+  </script>
 
 </body>
 </html>
