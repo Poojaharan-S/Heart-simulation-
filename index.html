@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>3D Human Heart & Blood Circulation</title>
+<title>Human Heart 3D Simulation</title>
+
+<script src="https://static.sketchfab.com/api/sketchfab-viewer-1.12.1.js"></script>
 
 <style>
 * {
@@ -13,188 +15,119 @@
 
 body {
     margin: 0;
-    background: #071525;
-    color: #f4f8ff;
     font-family: Arial, sans-serif;
+    background: #081321;
+    color: #ffffff;
 }
 
 header {
     text-align: center;
-    padding: 18px 12px 10px;
+    padding: 22px 12px;
+    background: #101f33;
 }
 
-h1 {
-    font-size: clamp(22px, 4vw, 32px);
-    margin: 0 0 12px;
+header h1 {
+    margin: 0 0 8px;
+    font-size: 28px;
 }
 
-.legend {
-    display: flex;
-    justify-content: center;
-    gap: 18px;
-    flex-wrap: wrap;
-    font-size: 14px;
+header p {
+    margin: 0;
+    color: #b8c9dd;
 }
 
-.dot {
-    display: inline-block;
-    width: 11px;
-    height: 11px;
-    border-radius: 50%;
-    margin-right: 6px;
-}
-
-.blue {
-    background: #32baff;
-}
-
-.red {
-    background: #ff405b;
-}
-
-.layout {
-    max-width: 1200px;
+main {
+    max-width: 1000px;
     margin: auto;
     padding: 12px;
-    display: grid;
-    grid-template-columns: minmax(0, 1.5fr) minmax(260px, 1fr);
-    gap: 14px;
 }
 
-.panel {
-    background: #0d2238;
-    border: 1px solid #25435e;
-    border-radius: 14px;
-    overflow: hidden;
+.card {
+    margin-bottom: 16px;
+    padding: 16px;
+    background: #101f33;
+    border: 1px solid #29415d;
+    border-radius: 12px;
 }
 
 .viewer {
-    height: min(68vh, 650px);
-    min-height: 400px;
-    background: #071525;
+    width: 100%;
+    height: 500px;
+    position: relative;
+    background: #050a12;
+    border-radius: 10px;
+    overflow: hidden;
 }
 
-.viewer iframe {
-    display: block;
+iframe {
     width: 100%;
     height: 100%;
-    border: 0;
+    border: none;
 }
 
-.info {
-    padding: 16px;
-}
-
-.info h2,
-.sequence h2 {
-    font-size: 19px;
-    margin: 0 0 12px;
-}
-
-.flow {
-    padding: 13px;
-    border-radius: 10px;
-    background: #07192b;
-    margin: 10px 0;
-    line-height: 1.6;
-    font-size: 14px;
-}
-
-.flow strong {
-    display: block;
-    font-size: 16px;
-    margin-bottom: 5px;
-}
-
-.blueText {
-    color: #58caff;
-}
-
-.redText {
-    color: #ff687e;
-}
-
-#status {
-    line-height: 1.6;
-    font-size: 14px;
-}
-
-.buttons {
+#loading {
+    position: absolute;
+    inset: 0;
     display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 14px;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    text-align: center;
+    color: #ffffff;
+    background: #050a12;
+}
+
+.instructions {
+    color: #b8c9dd;
+    font-size: 14px;
+    line-height: 1.6;
 }
 
 button {
-    border: 0;
-    border-radius: 9px;
-    padding: 12px 14px;
-    background: #1b4c70;
+    padding: 10px 12px;
+    margin: 4px;
+    border: 1px solid #477294;
+    border-radius: 8px;
+    background: #18344e;
     color: white;
-    font-weight: bold;
-    font-size: 14px;
     cursor: pointer;
 }
 
-button:active {
-    transform: scale(0.98);
+button.active,
+button:hover {
+    background: #087ca5;
+    border-color: #65d5ff;
 }
 
-button:focus-visible {
-    outline: 2px solid #65c8ff;
-    outline-offset: 3px;
-}
-
-.sequence {
-    grid-column: 1 / -1;
-    padding: 16px;
-}
-
-.steps {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 9px;
-}
-
-.step {
-    background: #07192b;
-    border: 1px solid #25435e;
-    border-radius: 9px;
-    padding: 12px 8px;
-    text-align: center;
-    font-size: 13px;
+#status {
+    color: #aee7ff;
     line-height: 1.5;
 }
 
-.step b {
-    display: block;
-    margin-bottom: 5px;
-    font-size: 16px;
+.structure {
+    padding: 12px;
+    margin: 8px 0;
+    background: #0a1727;
+    border: 1px solid #29415d;
+    border-radius: 8px;
 }
 
-.step.active {
-    outline: 2px solid #65c8ff;
-    background: #103452;
+.structure strong {
+    color: #65d5ff;
 }
 
-@media (max-width: 720px) {
-    .layout {
-        grid-template-columns: 1fr;
-        padding: 9px;
-    }
+.flow {
+    line-height: 1.9;
+    color: #dcecff;
+}
 
+@media (max-width: 600px) {
     .viewer {
-        height: 60vh;
-        min-height: 360px;
+        height: 430px;
     }
 
-    .sequence {
-        grid-column: auto;
-    }
-
-    .steps {
-        grid-template-columns: repeat(2, 1fr);
+    header h1 {
+        font-size: 23px;
     }
 }
 </style>
@@ -203,176 +136,315 @@ button:focus-visible {
 <body>
 
 <header>
-    <h1>🫀 3D Human Heart & Blood Circulation</h1>
-
-    <div class="legend">
-        <span>
-            <i class="dot blue"></i>
-            Oxygen-poor blood
-        </span>
-
-        <span>
-            <i class="dot red"></i>
-            Oxygen-rich blood
-        </span>
-    </div>
+    <h1>Human Heart — 3D Simulation</h1>
+    <p>Explore the human heart and understand blood circulation.</p>
 </header>
 
-<main class="layout">
+<main>
 
-    <!-- Interactive 3D Heart Model -->
-    <section class="panel">
+    <section class="card">
+        <h2>Interactive 3D Human Heart</h2>
+
+        <p class="instructions">
+            Drag to rotate the heart and use pinch or scroll gestures to zoom.
+        </p>
+
         <div class="viewer">
 
             <iframe
-                title="Interactive 3D Human Heart Model"
-                src="https://sketchfab.com/models/5da08bb137014f0392c69f9997f777cd/embed"
+                id="heartFrame"
+                title="Realistic 3D Human Heart"
+                src="https://sketchfab.com/models/5da08bb137014f0392c69f9997f777cd/embed?autostart=1&preload=1&ui_theme=dark"
                 allow="autoplay; fullscreen; xr-spatial-tracking"
-                allowfullscreen
-                loading="eager">
+                allowfullscreen>
             </iframe>
 
+            <div id="loading">
+                Loading the 3D heart model...
+            </div>
+
         </div>
     </section>
 
-    <!-- Blood Circulation Information -->
-    <section class="panel info">
+    <section class="card">
+        <h2>Place Anatomical Labels</h2>
 
-        <h2>Blood Circulation</h2>
-
-        <div class="flow">
-            <strong class="blueText">
-                🔵 Oxygen-Poor Blood
-            </strong>
-
-            Body → Venae cavae → Right atrium →
-            Right ventricle → Pulmonary artery → Lungs.
-        </div>
-
-        <div class="flow">
-            <strong class="redText">
-                🔴 Oxygen-Rich Blood
-            </strong>
-
-            Lungs → Pulmonary veins → Left atrium →
-            Left ventricle → Aorta → Body.
-        </div>
-
-        <p id="status" aria-live="polite">
-            Explore the 3D heart by dragging your finger
-            to rotate the model. Use the viewer controls
-            to zoom in and out.
+        <p class="instructions">
+            Select a structure below, then tap the corresponding point on
+            the heart. The label will be attached to the selected 3D position
+            if the model and Viewer API support annotation placement.
         </p>
 
-        <div class="buttons">
-            <button id="start">▶ Start Flow Guide</button>
-            <button id="pause">⏸ Pause</button>
-            <button id="reset">↻ Reset</button>
-        </div>
+        <div id="buttons"></div>
 
+        <p id="status">
+            Loading the viewer...
+        </p>
+
+        <button id="cancel">Cancel Selection</button>
+        <button id="clear">Remove Labels</button>
+        <button id="export">Export Coordinates</button>
     </section>
 
-    <!-- Circulation Sequence -->
-    <section class="panel sequence">
+    <section class="card">
+        <h2>Anatomical Structures</h2>
 
-        <h2>Blood Flow Sequence</h2>
+        <div class="structure">
+            <strong>Aorta</strong>
+            <p>Carries oxygen-rich blood from the left ventricle to the body.</p>
+        </div>
 
-        <div class="steps" id="steps">
+        <div class="structure">
+            <strong>Superior Vena Cava</strong>
+            <p>Returns oxygen-poor blood from the upper body to the right atrium.</p>
+        </div>
 
-            <div class="step">
-                <b>1</b>
-                Body → Right atrium
-            </div>
+        <div class="structure">
+            <strong>Inferior Vena Cava</strong>
+            <p>Returns oxygen-poor blood from the lower body to the right atrium.</p>
+        </div>
 
-            <div class="step">
-                <b>2</b>
-                Right ventricle → Lungs
-            </div>
+        <div class="structure">
+            <strong>Pulmonary Artery</strong>
+            <p>Carries oxygen-poor blood from the right ventricle to the lungs.</p>
+        </div>
 
-            <div class="step">
-                <b>3</b>
-                Lungs → Left atrium
-            </div>
+        <div class="structure">
+            <strong>Pulmonary Veins</strong>
+            <p>Carry oxygen-rich blood from the lungs to the left atrium.</p>
+        </div>
 
-            <div class="step">
-                <b>4</b>
-                Left ventricle → Body
-            </div>
+        <div class="structure">
+            <strong>Right Atrium</strong>
+            <p>Receives oxygen-poor blood returning from the body.</p>
+        </div>
 
+        <div class="structure">
+            <strong>Right Ventricle</strong>
+            <p>Pumps oxygen-poor blood toward the lungs.</p>
+        </div>
+
+        <div class="structure">
+            <strong>Left Atrium</strong>
+            <p>Receives oxygen-rich blood from the lungs.</p>
+        </div>
+
+        <div class="structure">
+            <strong>Left Ventricle</strong>
+            <p>Pumps oxygen-rich blood into the aorta.</p>
+        </div>
+
+        <div class="structure">
+            <strong>Septum</strong>
+            <p>Separates the right and left sides of the heart.</p>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>Blood Circulation Pathway</h2>
+
+        <div class="flow">
+            Body → Superior and Inferior Vena Cava → Right Atrium
+            → Right Ventricle → Pulmonary Artery → Lungs
+            → Pulmonary Veins → Left Atrium → Left Ventricle
+            → Aorta → Body
         </div>
     </section>
 
 </main>
 
 <script>
-const messages = [
-    "Step 1: Oxygen-poor blood returns from the body through the venae cavae and enters the right atrium.",
-    "Step 2: The right ventricle pumps oxygen-poor blood through the pulmonary artery to the lungs.",
-    "Step 3: Oxygen-rich blood returns from the lungs through the pulmonary veins and enters the left atrium.",
-    "Step 4: The left ventricle pumps oxygen-rich blood through the aorta to the body."
-];
+(function () {
 
-let index = 0;
-let timer = null;
+    const MODEL_UID = "5da08bb137014f0392c69f9997f777cd";
 
-const status = document.getElementById("status");
-const steps = [...document.querySelectorAll(".step")];
+    const structures = [
+        ["Aorta", "Carries oxygen-rich blood to the body."],
+        ["Superior Vena Cava", "Returns blood from the upper body."],
+        ["Inferior Vena Cava", "Returns blood from the lower body."],
+        ["Pulmonary Artery", "Carries blood from the heart to the lungs."],
+        ["Pulmonary Veins", "Return oxygen-rich blood from the lungs."],
+        ["Right Atrium", "Receives oxygen-poor blood."],
+        ["Right Ventricle", "Pumps blood toward the lungs."],
+        ["Left Atrium", "Receives oxygen-rich blood."],
+        ["Left Ventricle", "Pumps blood into the aorta."],
+        ["Septum", "Separates the two sides of the heart."]
+    ];
 
-function showStep() {
-    steps.forEach((step, i) => {
-        step.classList.toggle("active", i === index);
+    const frame = document.getElementById("heartFrame");
+    const loading = document.getElementById("loading");
+    const status = document.getElementById("status");
+    const buttons = document.getElementById("buttons");
+
+    let api = null;
+    let selected = null;
+    let placed = [];
+
+    structures.forEach(function (part) {
+        const button = document.createElement("button");
+
+        button.textContent = part[0];
+        button.type = "button";
+
+        button.addEventListener("click", function () {
+            if (!api) {
+                status.textContent =
+                    "The annotation API is not initialized. The 3D embed may still work.";
+                return;
+            }
+
+            selected = {
+                name: part[0],
+                description: part[1]
+            };
+
+            buttons.querySelectorAll("button").forEach(function (b) {
+                b.classList.toggle("active", b === button);
+            });
+
+            status.textContent =
+                "Selected " + part[0] +
+                ". Tap the matching point on the heart.";
+        });
+
+        buttons.appendChild(button);
     });
 
-    status.textContent = messages[index];
-}
+    document.getElementById("cancel").addEventListener("click", function () {
+        selected = null;
 
-function startGuide() {
-    if (timer !== null) {
+        buttons.querySelectorAll("button").forEach(function (b) {
+            b.classList.remove("active");
+        });
+
+        status.textContent = "Selection cancelled.";
+    });
+
+    document.getElementById("clear").addEventListener("click", function () {
+        if (!api) return;
+
+        api.removeAllAnnotations(function (error) {
+            if (error) {
+                status.textContent = "Could not remove the annotations.";
+                return;
+            }
+
+            placed = [];
+            selected = null;
+            status.textContent = "Annotations removed.";
+        });
+    });
+
+    document.getElementById("export").addEventListener("click", function () {
+        if (placed.length === 0) {
+            status.textContent = "Place at least one label before exporting.";
+            return;
+        }
+
+        const blob = new Blob(
+            [JSON.stringify(placed, null, 2)],
+            { type: "application/json" }
+        );
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = "heart-label-coordinates.json";
+        link.click();
+
+        URL.revokeObjectURL(url);
+    });
+
+    if (!window.Sketchfab) {
+        status.textContent =
+            "The Sketchfab API did not load. Check your internet connection.";
         return;
     }
 
-    showStep();
+    const client = new Sketchfab("1.12.1", frame);
 
-    timer = setInterval(() => {
-        index = (index + 1) % messages.length;
-        showStep();
-    }, 3000);
-}
+    client.init(MODEL_UID, {
+        autostart: 1,
+        preload: 1,
+        ui_theme: "dark",
 
-function pauseGuide() {
-    if (timer !== null) {
-        clearInterval(timer);
-        timer = null;
-    }
+        success: function (viewerApi) {
+            api = viewerApi;
 
-    status.textContent =
-        "Flow guide paused. You can continue exploring the 3D heart model.";
-}
+            api.start(function () {
+                status.textContent = "Starting the 3D viewer...";
+            });
 
-function resetGuide() {
-    if (timer !== null) {
-        clearInterval(timer);
-        timer = null;
-    }
+            api.addEventListener("viewerready", function () {
+                loading.style.display = "none";
 
-    index = 0;
+                status.textContent =
+                    "Viewer ready. Select a structure and tap the model to place its label.";
 
-    steps.forEach(step => {
-        step.classList.remove("active");
+                api.addEventListener("click", function (info) {
+                    if (!selected) return;
+
+                    if (!info || !info.position3D) {
+                        status.textContent =
+                            "No surface position received. Tap directly on the heart.";
+                        return;
+                    }
+
+                    const part = selected;
+
+                    api.getCameraLookAt(function (error, camera) {
+                        if (error || !camera) {
+                            status.textContent =
+                                "Unable to get the camera position.";
+                            return;
+                        }
+
+                        api.createAnnotationFromScenePosition(
+                            info.position3D,
+                            camera.position,
+                            camera.target,
+                            part.name,
+                            part.description,
+                            function (annotationError) {
+                                if (annotationError) {
+                                    status.textContent =
+                                        "Annotation failed. Check the Viewer API and model support.";
+                                    return;
+                                }
+
+                                placed.push({
+                                    name: part.name,
+                                    description: part.description,
+                                    position: info.position3D,
+                                    cameraPosition: camera.position,
+                                    cameraTarget: camera.target
+                                });
+
+                                selected = null;
+
+                                buttons.querySelectorAll("button").forEach(function (b) {
+                                    b.classList.remove("active");
+                                });
+
+                                status.textContent =
+                                    part.name + " label added.";
+                            }
+                        );
+                    });
+                }, { pick: "slow" });
+            });
+        },
+
+        error: function () {
+            status.textContent =
+                "The Viewer API could not initialize. The standard model embed may still work.";
+            loading.textContent =
+                "The interactive API did not initialize. Try refreshing the page.";
+        }
     });
 
-    status.textContent =
-        "Guide reset. Tap Start Flow Guide to begin again.";
-}
-
-document.getElementById("start")
-    .addEventListener("click", startGuide);
-
-document.getElementById("pause")
-    .addEventListener("click", pauseGuide);
-
-document.getElementById("reset")
-    .addEventListener("click", resetGuide);
+})();
 </script>
 
 </body>
