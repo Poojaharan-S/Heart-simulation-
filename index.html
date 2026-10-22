@@ -1,32 +1,379 @@
-<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>3D Heart & Blood Circulation</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>3D Human Heart & Blood Circulation</title>
+
 <style>
-:root{--blue:#35c8ff;--red:#ff3c60;--bg:#061426;--panel:#0a2038}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#153d60,#061426 65%);color:#f3f8ff;font-family:Arial,sans-serif}header{padding:16px 18px 10px;text-align:center}h1{margin:0;font-size:clamp(23px,4vw,34px)}.legend{margin-top:12px;display:inline-flex;gap:18px;flex-wrap:wrap;justify-content:center;background:#06182b;border:1px solid #214765;border-radius:14px;padding:10px 14px}.dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:7px}.blue{background:var(--blue);box-shadow:0 0 12px var(--blue)}.red{background:var(--red);box-shadow:0 0 12px var(--red)}main{max-width:1120px;margin:auto;padding:12px;display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,1fr);gap:14px}.card{border:1px solid #204564;border-radius:16px;background:linear-gradient(145deg,#0b2440,#07172a);overflow:hidden}.stage{height:530px;position:relative;touch-action:pan-y}.stage canvas{width:100%;height:100%;display:block;touch-action:pan-y}.drag{position:absolute;left:12px;bottom:10px;color:#a8cbe8;font-size:12px;pointer-events:none;background:#061426b8;padding:7px 9px;border-radius:8px}.controls{display:flex;gap:8px;flex-wrap:wrap;padding:12px;border-top:1px solid #204564}button{border:1px solid #2b5878;border-radius:11px;background:#153b5f;color:#fff;padding:11px 13px;font-size:14px;cursor:pointer}button.primary{background:#008c62}.side{padding:15px}.side h2,.seq h2{font-size:20px;margin:3px 0 12px}.path{padding:12px;margin:10px 0;background:#06182b;border:1px solid #164369;border-radius:12px;line-height:1.8;color:#c8e2f7;font-size:14px}.path strong{display:block;font-size:16px}.chambers{display:grid;grid-template-columns:1fr 1fr;gap:8px}.ch{background:#071a2e;border:1px solid #194469;border-radius:10px;padding:10px;font-size:13px}.ch b{display:block;margin-bottom:5px}.status{color:#c5e3fb;line-height:1.5;font-size:14px;min-height:40px}.seq{grid-column:1/-1;padding:15px}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.step{border:1px solid #194469;background:#06182b;padding:10px;border-radius:10px;text-align:center;font-size:13px}.step strong{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#164f7d;margin-bottom:5px}.step.active{box-shadow:0 0 15px #368ac7;border-color:#fff}@media(max-width:760px){main{grid-template-columns:1fr;padding:9px}.stage{height:420px}.seq{grid-column:auto}.steps{grid-template-columns:repeat(2,1fr)}}
-</style></head><body><header><h1>🫀 3D Human Heart & Blood Circulation</h1><div class="legend"><span><i class="dot blue"></i>Oxygen-poor blood</span><span><i class="dot red"></i>Oxygen-rich blood</span></div></header>
-<main><section class="card"><div class="stage" id="stage"><div class="drag">Drag to rotate · pinch or scroll to zoom</div></div><div class="controls"><button class="primary" id="start">▶ Start circulation</button><button id="pause">Ⅱ Pause</button><button id="reset">↻ Reset view</button><button id="beat">💓 Heartbeat: On</button></div></section>
-<aside class="card side"><h2>Blood circulation pathway</h2><div class="path"><strong style="color:var(--blue)">🔵 Oxygen-poor blood</strong>1. Vena cava<br>2. Right atrium<br>3. Right ventricle<br>4. Pulmonary artery → lungs</div><div class="path"><strong style="color:var(--red)">🔴 Oxygen-rich blood</strong>5. Pulmonary veins ← lungs<br>6. Left atrium<br>7. Left ventricle<br>8. Aorta → body</div><p class="status" id="status">Press Start circulation to follow the blood-flow sequence.</p><h2>Four chambers</h2><div class="chambers"><div class="ch"><b style="color:var(--blue)">Right atrium</b>Receives oxygen-poor blood.</div><div class="ch"><b style="color:var(--blue)">Right ventricle</b>Pumps blood to the lungs.</div><div class="ch"><b style="color:var(--red)">Left atrium</b>Receives oxygen-rich blood.</div><div class="ch"><b style="color:var(--red)">Left ventricle</b>Pumps blood to the body.</div></div></aside>
-<section class="card seq"><h2>Blood-flow sequence</h2><div class="steps" id="steps"></div></section></main>
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script><script>
-(()=>{const stage=document.getElementById('stage');if(!window.THREE){stage.innerHTML='<div style="padding:30px;color:white">3D model needs an internet connection to load. Please refresh while online.</div>';return}
-const scene=new THREE.Scene();scene.background=new THREE.Color('#081a2c');const camera=new THREE.PerspectiveCamera(38,stage.clientWidth/stage.clientHeight,.1,100);camera.position.set(0,0,9.3);const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(stage.clientWidth,stage.clientHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.25;stage.appendChild(renderer.domElement);
-scene.add(new THREE.AmbientLight(0x9bcfff,1.45));const key=new THREE.DirectionalLight(0xffffff,3);key.position.set(4,5,7);scene.add(key);const rim=new THREE.PointLight(0x329dff,18);rim.position.set(-4,1,3);scene.add(rim);const warm=new THREE.PointLight(0xff3859,12);warm.position.set(4,-1,2);scene.add(warm);
-const root=new THREE.Group();scene.add(root);const mat=(color,rough=.34,metal=.08)=>new THREE.MeshStandardMaterial({color,roughness:rough,metalness:metal});const muscle=mat('#b84761',.32),blue=mat('#087fd0',.25,.12),blueLight=mat('#46d8ff',.22,.12),red=mat('#df2446',.25,.1),redLight=mat('#ff788b',.22,.1),dark=mat('#57213b',.4);
-// Extruded anatomical heart silhouette, sculpted with a smooth bevel for visible depth.
-const shape=new THREE.Shape();shape.moveTo(0,-1.8);shape.bezierCurveTo(-.45,-1.35,-2.05,-.15,-1.72,1.05);shape.bezierCurveTo(-1.48,1.9,-.45,1.8,0,1.05);shape.bezierCurveTo(.58,2.02,1.65,1.7,1.72,.72);shape.bezierCurveTo(1.82,-.18,.72,-1.28,0,-1.8);const geo=new THREE.ExtrudeGeometry(shape,{depth:.68,bevelEnabled:true,bevelSegments:5,steps:1,bevelSize:.15,bevelThickness:.16,curveSegments:24});geo.center();const body=new THREE.Mesh(geo,muscle);body.scale.set(1,1,1);root.add(body);
-function ell(x,y,z,sx,sy,sz,material){const m=new THREE.Mesh(new THREE.SphereGeometry(1,32,24),material);m.position.set(x,y,z);m.scale.set(sx,sy,sz);root.add(m);return m}function tube(points,r,material){const c=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));const m=new THREE.Mesh(new THREE.TubeGeometry(c,48,r,12,false),material);root.add(m);return m}
-// Four raised, colored chamber domes on the front surface.
-ell(-.58,.45,.48,.56,.61,.22,blue);ell(-.53,-.72,.48,.58,.75,.24,blue);ell(.57,.45,.5,.56,.59,.23,red);ell(.53,-.7,.5,.62,.79,.25,red);
-// Vessels are rounded 3D tubes.
-tube([[-.7,.9,.18],[-.88,1.35,.2],[-.88,1.85,.15],[-.58,2.05,.12]],.22,blueLight);
-tube([[-.72,-.85,.15],[-.88,-1.28,.16],[-.83,-1.75,.12]],.22,blueLight);
-tube([[-.45,.62,.54],[-.42,1.1,.62],[-.15,1.42,.58],[.22,1.38,.55]],.22,blue);
-tube([[.45,.65,.55],[.55,1.12,.58],[.78,1.47,.55],[.82,1.83,.52],[.55,2.03,.5]],.25,redLight);
-tube([[.84,.18,.45],[1.2,.18,.48],[1.45,.02,.44]],.18,redLight);
-// Chamber divider and small valve-like raised shapes
- tube([[0,1.02,.72],[.02,.35,.76],[0,-.25,.76],[.05,-.85,.7],[0,-1.28,.58]],.055,mat('#ffbdc8',.3));
-ell(-.05,.02,.72,.13,.18,.09,blueLight);ell(.12,-.22,.73,.13,.18,.09,redLight);
-// Glowing flow particles travel along vessel/chamber paths.
-const routes=[{c:0x45dfff,p:[[-.7,1.85,.38],[-.72,.85,.72],[-.55,.4,.75],[-.55,-.65,.76],[-.42,-1.35,.42]]},{c:0x45dfff,p:[[-.5,.45,.75],[-.3,1.05,.7],[.15,1.38,.62]]},{c:0xff6b80,p:[[1.35,.05,.55],[.8,.25,.75],[.55,.45,.77],[.55,-.65,.8],[.45,-1.4,.45]]},{c:0xff6b80,p:[[.55,-.65,.8],[.6,.55,.76],[.78,1.45,.7],[.55,1.95,.62]]}];const particles=[];routes.forEach(route=>{const curve=new THREE.CatmullRomCurve3(route.p.map(p=>new THREE.Vector3(...p)));for(let i=0;i<7;i++){const pm=new THREE.Mesh(new THREE.SphereGeometry(.055,12,10),new THREE.MeshBasicMaterial({color:route.c}));root.add(pm);particles.push({mesh:pm,curve,t:i/7,speed:.075+(i%3)*.012})}});
-let down=false,lastX=0,lastY=0,auto=true,paused=false,heartbeat=true,step=0,scale=1;renderer.domElement.addEventListener('pointerdown',e=>{down=true;lastX=e.clientX;lastY=e.clientY;renderer.domElement.setPointerCapture(e.pointerId)});renderer.domElement.addEventListener('pointerup',()=>down=false);renderer.domElement.addEventListener('pointermove',e=>{if(!down)return;root.rotation.y+=(e.clientX-lastX)*.009;root.rotation.x+=(e.clientY-lastY)*.009;lastX=e.clientX;lastY=e.clientY});renderer.domElement.addEventListener('wheel',e=>{camera.position.z=Math.max(5,Math.min(13,camera.position.z+e.deltaY*.008));e.preventDefault()},{passive:false});let start=performance.now();function animate(now){requestAnimationFrame(animate);const t=(now-start)/1000;if(!paused){if(auto)root.rotation.y=Math.sin(t*.22)*.16;if(heartbeat){const beat=1+Math.max(0,Math.sin(t*5))*.018;body.scale.set(beat,beat,beat)}particles.forEach(p=>{p.t=(p.t+p.speed*.005)%1;p.mesh.position.copy(p.curve.getPoint(p.t));p.mesh.visible=auto})}renderer.render(scene,camera)}requestAnimationFrame(animate);
-const names=['Vena cava','Right atrium','Right ventricle','Pulmonary artery','Pulmonary veins','Left atrium','Left ventricle','Aorta'];const desc=['Oxygen-poor blood returns from the body through the venae cavae.','The right atrium receives oxygen-poor blood.','The right ventricle pumps blood toward the lungs.','The pulmonary artery carries blood to the lungs to receive oxygen.','Oxygen-rich blood returns from the lungs through the pulmonary veins.','The left atrium receives oxygen-rich blood.','The left ventricle pumps oxygen-rich blood to the body.','The aorta distributes oxygen-rich blood around the body.'];const steps=document.getElementById('steps'),status=document.getElementById('status');names.forEach((n,i)=>{const d=document.createElement('div');d.className='step';d.innerHTML='<strong>'+(i+1)+'</strong><br>'+n;steps.appendChild(d)});function show(i){step=i;[...steps.children].forEach((e,j)=>e.classList.toggle('active',j===i));status.textContent=desc[i]}let timer=null;document.getElementById('start').onclick=()=>{auto=true;paused=false;particles.forEach(p=>p.mesh.visible=true);if(timer)clearInterval(timer);show(step);timer=setInterval(()=>show((step+1)%8),1800)};document.getElementById('pause').onclick=()=>{paused=!paused;document.getElementById('pause').textContent=paused?'▶ Resume':'Ⅱ Pause';if(paused&&timer){clearInterval(timer);timer=null}else if(!paused)document.getElementById('start').click()};document.getElementById('reset').onclick=()=>{root.rotation.set(0,0,0);camera.position.set(0,0,9.3);auto=true;paused=false;show(0);if(timer)clearInterval(timer);timer=null;document.getElementById('pause').textContent='Ⅱ Pause'};document.getElementById('beat').onclick=e=>{heartbeat=!heartbeat;e.target.textContent='💓 Heartbeat: '+(heartbeat?'On':'Off');if(!heartbeat)body.scale.set(1,1,1)};show(0);window.addEventListener('resize',()=>{camera.aspect=stage.clientWidth/stage.clientHeight;camera.updateProjectionMatrix();renderer.setSize(stage.clientWidth,stage.clientHeight)});
-})();</script></body></html>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #071525;
+    color: #f4f8ff;
+    font-family: Arial, sans-serif;
+}
+
+header {
+    text-align: center;
+    padding: 18px 12px 10px;
+}
+
+h1 {
+    font-size: clamp(22px, 4vw, 32px);
+    margin: 0 0 12px;
+}
+
+.legend {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    font-size: 14px;
+}
+
+.dot {
+    display: inline-block;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    margin-right: 6px;
+}
+
+.blue {
+    background: #32baff;
+}
+
+.red {
+    background: #ff405b;
+}
+
+.layout {
+    max-width: 1200px;
+    margin: auto;
+    padding: 12px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(260px, 1fr);
+    gap: 14px;
+}
+
+.panel {
+    background: #0d2238;
+    border: 1px solid #25435e;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.viewer {
+    height: min(68vh, 650px);
+    min-height: 400px;
+    background: #071525;
+}
+
+.viewer iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.info {
+    padding: 16px;
+}
+
+.info h2,
+.sequence h2 {
+    font-size: 19px;
+    margin: 0 0 12px;
+}
+
+.flow {
+    padding: 13px;
+    border-radius: 10px;
+    background: #07192b;
+    margin: 10px 0;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.flow strong {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.blueText {
+    color: #58caff;
+}
+
+.redText {
+    color: #ff687e;
+}
+
+#status {
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+}
+
+button {
+    border: 0;
+    border-radius: 9px;
+    padding: 12px 14px;
+    background: #1b4c70;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+button:focus-visible {
+    outline: 2px solid #65c8ff;
+    outline-offset: 3px;
+}
+
+.sequence {
+    grid-column: 1 / -1;
+    padding: 16px;
+}
+
+.steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 9px;
+}
+
+.step {
+    background: #07192b;
+    border: 1px solid #25435e;
+    border-radius: 9px;
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.step b {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 16px;
+}
+
+.step.active {
+    outline: 2px solid #65c8ff;
+    background: #103452;
+}
+
+@media (max-width: 720px) {
+    .layout {
+        grid-template-columns: 1fr;
+        padding: 9px;
+    }
+
+    .viewer {
+        height: 60vh;
+        min-height: 360px;
+    }
+
+    .sequence {
+        grid-column: auto;
+    }
+
+    .steps {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🫀 3D Human Heart & Blood Circulation</h1>
+
+    <div class="legend">
+        <span>
+            <i class="dot blue"></i>
+            Oxygen-poor blood
+        </span>
+
+        <span>
+            <i class="dot red"></i>
+            Oxygen-rich blood
+        </span>
+    </div>
+</header>
+
+<main class="layout">
+
+    <!-- Interactive 3D Heart Model -->
+    <section class="panel">
+        <div class="viewer">
+
+            <iframe
+                title="Interactive 3D Human Heart Model"
+                src="https://sketchfab.com/models/5da08bb137014f0392c69f9997f777cd/embed"
+                allow="autoplay; fullscreen; xr-spatial-tracking"
+                allowfullscreen
+                loading="eager">
+            </iframe>
+
+        </div>
+    </section>
+
+    <!-- Blood Circulation Information -->
+    <section class="panel info">
+
+        <h2>Blood Circulation</h2>
+
+        <div class="flow">
+            <strong class="blueText">
+                🔵 Oxygen-Poor Blood
+            </strong>
+
+            Body → Venae cavae → Right atrium →
+            Right ventricle → Pulmonary artery → Lungs.
+        </div>
+
+        <div class="flow">
+            <strong class="redText">
+                🔴 Oxygen-Rich Blood
+            </strong>
+
+            Lungs → Pulmonary veins → Left atrium →
+            Left ventricle → Aorta → Body.
+        </div>
+
+        <p id="status" aria-live="polite">
+            Explore the 3D heart by dragging your finger
+            to rotate the model. Use the viewer controls
+            to zoom in and out.
+        </p>
+
+        <div class="buttons">
+            <button id="start">▶ Start Flow Guide</button>
+            <button id="pause">⏸ Pause</button>
+            <button id="reset">↻ Reset</button>
+        </div>
+
+    </section>
+
+    <!-- Circulation Sequence -->
+    <section class="panel sequence">
+
+        <h2>Blood Flow Sequence</h2>
+
+        <div class="steps" id="steps">
+
+            <div class="step">
+                <b>1</b>
+                Body → Right atrium
+            </div>
+
+            <div class="step">
+                <b>2</b>
+                Right ventricle → Lungs
+            </div>
+
+            <div class="step">
+                <b>3</b>
+                Lungs → Left atrium
+            </div>
+
+            <div class="step">
+                <b>4</b>
+                Left ventricle → Body
+            </div>
+
+        </div>
+    </section>
+
+</main>
+
+<script>
+const messages = [
+    "Step 1: Oxygen-poor blood returns from the body through the venae cavae and enters the right atrium.",
+    "Step 2: The right ventricle pumps oxygen-poor blood through the pulmonary artery to the lungs.",
+    "Step 3: Oxygen-rich blood returns from the lungs through the pulmonary veins and enters the left atrium.",
+    "Step 4: The left ventricle pumps oxygen-rich blood through the aorta to the body."
+];
+
+let index = 0;
+let timer = null;
+
+const status = document.getElementById("status");
+const steps = [...document.querySelectorAll(".step")];
+
+function showStep() {
+    steps.forEach((step, i) => {
+        step.classList.toggle("active", i === index);
+    });
+
+    status.textContent = messages[index];
+}
+
+function startGuide() {
+    if (timer !== null) {
+        return;
+    }
+
+    showStep();
+
+    timer = setInterval(() => {
+        index = (index + 1) % messages.length;
+        showStep();
+    }, 3000);
+}
+
+function pauseGuide() {
+    if (timer !== null) {
+        clearInterval(timer);
+        timer = null;
+    }
+
+    status.textContent =
+        "Flow guide paused. You can continue exploring the 3D heart model.";
+}
+
+function resetGuide() {
+    if (timer !== null) {
+        clearInterval(timer);
+        timer = null;
+    }
+
+    index = 0;
+
+    steps.forEach(step => {
+        step.classList.remove("active");
+    });
+
+    status.textContent =
+        "Guide reset. Tap Start Flow Guide to begin again.";
+}
+
+document.getElementById("start")
+    .addEventListener("click", startGuide);
+
+document.getElementById("pause")
+    .addEventListener("click", pauseGuide);
+
+document.getElementById("reset")
+    .addEventListener("click", resetGuide);
+</script>
+
+</body>
+</html>
