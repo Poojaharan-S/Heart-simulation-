@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Human Heart Anatomy & Blood Circulation</title>
+<style>
+:root{--bg:#061426;--panel:#0a2038;--line:#16466c;--blue:#2ba6ff;--red:#ff4058;--text:#eef7ff;--muted:#b8d3ec}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 40% 20%,#0b2946,#04101f 70%);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+header{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;gap:15px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+h1{font-size:clamp(22px,3vw,34px);margin:0 0 6px}header p{margin:0;color:#91cfff}
+.legend{display:flex;gap:14px;flex-wrap:wrap;background:#071b30;padding:12px;border:1px solid var(--line);border-radius:12px;font-size:14px}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px}.blue{background:var(--blue);box-shadow:0 0 10px var(--blue)}.red{background:var(--red);box-shadow:0 0 10px var(--red)}
+main{max-width:1250px;margin:auto;padding:18px;display:grid;grid-template-columns:minmax(0,1.7fr) minmax(270px,1fr);gap:16px}
+.card{background:linear-gradient(145deg,#0a2038,#06172a);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.visual{min-height:460px;position:relative;display:flex;align-items:center;justify-content:center;padding:12px}
+canvas{display:block;width:100%;height:440px;max-height:65vh}
+.hint{position:absolute;bottom:10px;left:15px;color:#9abbd8;font-size:12px}
+.controls{display:flex;gap:10px;flex-wrap:wrap;padding:14px;border-top:1px solid var(--line)}
+button{border:1px solid #39719e;background:#102d4c;color:white;padding:11px 17px;border-radius:10px;font-size:15px;cursor:pointer}
+button.primary{background:#00a969;border-color:#00d889;font-weight:bold}button:hover{filter:brightness(1.18)}
+.side{padding:18px}.side h2{font-size:20px;margin:0 0 12px}.path{padding:12px;border-radius:12px;margin:10px 0;background:#07182b;border:1px solid #143b5e}.path h3{margin:0 0 8px;font-size:16px}.path p{margin:5px 0;color:var(--muted);line-height:1.55;font-size:14px}
+.stage{font-weight:bold;color:#fff}.note{font-size:13px;color:#a9c7e2;line-height:1.5}
+.chambers{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.chamber{padding:10px;border:1px solid #174368;border-radius:10px;font-size:13px;background:#081b30}.chamber b{display:block;margin-bottom:4px}
+.sequence{grid-column:1/-1;padding:16px}.sequence h2{margin:0 0 12px;font-size:19px}.steps{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}.step{background:#07182b;border:1px solid #174368;border-radius:10px;padding:9px 5px;text-align:center;font-size:12px;color:#cde4f8}.step .num{display:inline-flex;align-items:center;justify-content:center;width:25px;height:25px;border-radius:50%;margin-bottom:7px;background:#174c78;font-weight:bold}.step.active{border-color:#fff;box-shadow:0 0 14px #317fbc}.step.active.blueStep{background:#082b4b}.step.active.redStep{background:#3a1020}.footer{text-align:center;color:#7fa6c9;font-size:12px;padding:0 15px 18px}
+@media(max-width:850px){main{grid-template-columns:1fr}.sequence{grid-column:auto}.steps{grid-template-columns:repeat(4,1fr)}canvas{height:380px}.visual{min-height:400px}}
+@media(max-width:440px){.steps{grid-template-columns:repeat(2,1fr)}header{padding:15px}.legend{font-size:12px}main{padding:10px;gap:10px}.visual{min-height:350px}canvas{height:330px}}
+</style>
+</head>
+<body>
+<header>
+ <div><h1>🫀 Human Heart Anatomy & Blood Circulation</h1><p>Explore the heart and follow the flow of blood.</p></div>
+ <div class="legend"><span><i class="dot blue"></i>Oxygen-poor blood</span><span><i class="dot red"></i>Oxygen-rich blood</span></div>
+</header>
+<main>
+ <section class="card">
+  <div class="visual"><canvas id="heartCanvas" aria-label="Interactive 3D educational heart model"></canvas><div class="hint">Drag to rotate · Scroll/pinch to zoom</div></div>
+  <div class="controls"><button class="primary" id="start">▶ Start circulation</button><button id="pause">Ⅱ Pause</button><button id="reset">↻ Reset</button><button id="rotate">⟳ Auto-rotate: On</button></div>
+ </section>
+ <aside class="card side">
+  <h2>Blood circulation pathway</h2>
+  <div class="path"><h3 style="color:var(--blue)">🔵 Oxygen-poor blood</h3><p>1. Superior & inferior vena cava</p><p>2. Right atrium</p><p>3. Right ventricle</p><p>4. Pulmonary artery → lungs</p></div>
+  <div class="path"><h3 style="color:var(--red)">🔴 Oxygen-rich blood</h3><p>5. Pulmonary veins ← lungs</p><p>6. Left atrium</p><p>7. Left ventricle</p><p>8. Aorta → rest of body</p></div>
+  <p class="note" id="status" aria-live="polite">Press Start circulation to begin the guided sequence.</p>
+  <h2 style="margin-top:18px">Four chambers</h2>
+  <div class="chambers">
+   <div class="chamber"><b style="color:var(--blue)">Right atrium</b>Receives oxygen-poor blood.</div>
+   <div class="chamber"><b style="color:var(--blue)">Right ventricle</b>Pumps blood to the lungs.</div>
+   <div class="chamber"><b style="color:var(--red)">Left atrium</b>Receives oxygen-rich blood.</div>
+   <div class="chamber"><b style="color:var(--red)">Left ventricle</b>Pumps blood to the body.</div>
+  </div>
+ </aside>
+ <section class="card sequence"><h2>Blood-flow sequence</h2><div class="steps" id="steps"></div></section>
+</main>
+<div class="footer">Educational visualization only — simplified anatomy, not a medical or diagnostic tool.</div>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+
+const canvas=document.getElementById('heartCanvas');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setSize(canvas.clientWidth,canvas.clientHeight,false);
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(38,canvas.clientWidth/canvas.clientHeight,0.1,100);
+camera.position.set(0,0,9);
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;controls.autoRotate=true;controls.autoRotateSpeed=0.7;
+controls.minDistance=5;controls.maxDistance=13;
+scene.add(new THREE.HemisphereLight(0xc8e7ff,0x18243b,2.0));
+const key=new THREE.DirectionalLight(0xffffff,2.8);key.position.set(4,5,7);scene.add(key);
+const fill=new THREE.PointLight(0x2b8cff,2.0);fill.position.set(-4,0,4);scene.add(fill);
+const redLight=new THREE.PointLight(0xff284d,1.6);redLight.position.set(3,1,3);scene.add(redLight);
+const heart=new THREE.Group();scene.add(heart);
+const blueMat=new THREE.MeshStandardMaterial({color:0x087de0,roughness:.3,metalness:.05,emissive:0x003c8b,emissiveIntensity:.65});
+const redMat=new THREE.MeshStandardMaterial({color:0xe51e3d,roughness:.3,metalness:.05,emissive:0x790018,emissiveIntensity:.55});
+const muscleMat=new THREE.MeshStandardMaterial({color:0xc76b79,roughness:.48,metalness:.02});
+const paleMat=new THREE.MeshStandardMaterial({color:0xf1a0a8,roughness:.5});
+function ellipsoid(x,y,z,sx,sy,sz,mat,group=heart){const m=new THREE.Mesh(new THREE.SphereGeometry(1,32,24),mat);m.position.set(x,y,z);m.scale.set(sx,sy,sz);group.add(m);return m}
+function tube(points,r,mat,group=heart){const curve=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));const mesh=new THREE.Mesh(new THREE.TubeGeometry(curve,48,r,12,false),mat);group.add(mesh);return mesh}
+// Main rounded heart body and four visible chamber bulges (schematic, front view)
+ellipsoid(0,-.15,0,1.58,2.05,.72,muscleMat);
+ellipsoid(-.72,.45,.55,.65,.82,.28,blueMat);
+ellipsoid(-.66,-.85,.58,.68,.95,.30,blueMat);
+ellipsoid(.68,.45,.56,.62,.76,.30,redMat);
+ellipsoid(.63,-.82,.56,.72,1.05,.32,redMat);
+// Thin septum line to visually separate the sides
+tube([[0,1.05,.82],[.03,.35,.91],[0,-.35,.92],[.12,-1.1,.83]],.055,paleMat);
+// Major vessels
+tube([[-.75,1.35,.1],[-.82,2.1,.1],[-.82,2.75,.1]],.25,blueMat);
+tube([[-.82,-1.45,.1],[-.83,-2.0,.1],[-.83,-2.45,.1]],.24,blueMat);
+tube([[-.72,-.1,.6],[-1.05,.35,.65],[-1.55,.35,.55]],.22,blueMat);
+tube([[-.2,-.35,.62],[-.2,.35,.62],[-.1,.85,.55],[.35,1.15,.45],[.95,1.15,.4]],.24,blueMat);
+tube([[.15,.35,.55],[.1,1.05,.5],[.28,1.65,.4],[.72,1.9,.3],[1.25,1.82,.25],[1.42,1.3,.25],[1.42,.95,.25]],.27,redMat);
+tube([[.8,.45,.62],[1.3,.55,.6],[1.62,.4,.55]],.16,redMat);
+tube([[.82,.1,.62],[1.35,.12,.6],[1.62,-.02,.55]],.16,redMat);
+// Small vessel branches on aorta
+tube([[.55,1.63,.35],[.52,2.12,.3]],.12,redMat);
+tube([[.83,1.7,.32],[.9,2.18,.28]],.12,redMat);
+tube([[1.1,1.7,.3],[1.28,2.08,.25]],.12,redMat);
+// glowing pathway arrows as moving points
+const flowBlue=[],flowRed=[];
+function makeFlow(points,color,target){const curve=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));const line=new THREE.Mesh(new THREE.TubeGeometry(curve,64,.035,8,false),new THREE.MeshBasicMaterial({color,transparent:true,opacity:.6}));heart.add(line);for(let i=0;i<4;i++){const dot=new THREE.Mesh(new THREE.SphereGeometry(.09,16,12),new THREE.MeshBasicMaterial({color,emissive:color}));heart.add(dot);target.push({dot,curve,offset:i/4})}}
+makeFlow([[-.8,1.9,.35],[-.8,.6,.85],[-.65,-.75,.9],[-.15,-1.25,.85],[.2,-.3,.95],[.1,.7,.85],[.8,1.1,.6]],0x48c5ff,flowBlue);
+makeFlow([[.75,.65,.9],[.65,-.6,.95],[.7,-1.35,.85],[.35,-.85,.9],[.55,.15,.9],[.65,.75,.85],[1.3,1.7,.5]],0xff4b66,flowRed);
+const stepsData=[
+ ['Vena cava','blueStep'],['Right atrium','blueStep'],['Right ventricle','blueStep'],['Pulmonary artery','blueStep'],
+ ['Pulmonary veins','redStep'],['Left atrium','redStep'],['Left ventricle','redStep'],['Aorta','redStep']
+];
+const stepsEl=document.getElementById('steps');
+stepsData.forEach((s,i)=>{const d=document.createElement('div');d.className='step '+s[1];d.innerHTML=`<div class="num">${i+1}</div><div>${s[0]}</div>`;stepsEl.appendChild(d)});
+let running=false,step=0,last=0,elapsed=0;
+const status=document.getElementById('status');
+function activateStep(i){step=i;[...stepsEl.children].forEach((el,j)=>el.classList.toggle('active',j===i));const descriptions=[
+'Oxygen-poor blood returns from the body through the venae cavae.',
+'The right atrium receives oxygen-poor blood.',
+'The right ventricle pumps oxygen-poor blood toward the lungs.',
+'The pulmonary artery carries blood to the lungs to receive oxygen.',
+'Oxygen-rich blood returns from the lungs through the pulmonary veins.',
+'The left atrium receives oxygen-rich blood.',
+'The left ventricle pumps oxygen-rich blood out to the body.',
+'The aorta distributes oxygen-rich blood to the body.'
+];status.textContent=descriptions[i]}
+document.getElementById('start').onclick=()=>{running=true;controls.autoRotate=false;activateStep(step);status.textContent='Circulation running: '+stepsData[step][0]+'.'};
+document.getElementById('pause').onclick=()=>{running=false;status.textContent='Paused at: '+stepsData[step][0]+'.'};
+document.getElementById('reset').onclick=()=>{running=false;elapsed=0;step=0;activateStep(0);status.textContent='Reset complete. Press Start circulation to begin.'};
+document.getElementById('rotate').onclick=e=>{controls.autoRotate=!controls.autoRotate;e.currentTarget.textContent='⟳ Auto-rotate: '+(controls.autoRotate?'On':'Off')};
+function resize(){const w=canvas.clientWidth,h=canvas.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
+new ResizeObserver(resize).observe(canvas);
+function animate(t){requestAnimationFrame(animate);const dt=Math.min((t-last)/1000,.05)||0;last=t;if(running){elapsed+=dt;if(elapsed>2.1){elapsed=0;activateStep((step+1)%8)}}const pulse=1+Math.sin(t*.004)*.012;heart.scale.set(pulse,pulse,pulse);[...flowBlue,...flowRed].forEach((p,i)=>{const active=!running||((i<4&&step<4)||(i>=4&&step>=4));p.dot.visible=active;const u=(t*.00012+p.offset)%1;p.dot.position.copy(p.curve.getPoint(u));});controls.update();renderer.render(scene,camera)}
+activateStep(0);animate(0);
+</script>
+</body>
+</html>
