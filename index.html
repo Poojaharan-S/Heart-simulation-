@@ -118,7 +118,7 @@
 
     .vessel {
       fill: none;
-      stroke-width: 7;
+      stroke-width: 9;
       stroke-linecap: round;
       stroke-linejoin: round;
     }
@@ -156,20 +156,17 @@
     }
 
     .particle {
-      pointer-events: none;
       stroke: #ffffff;
-      stroke-width: 1.2;
-      filter: drop-shadow(0 0 4px currentColor);
+      stroke-width: 1;
+      pointer-events: none;
     }
 
     .blue-particle {
       fill: #7dd3fc;
-      color: #38bdf8;
     }
 
     .red-particle {
       fill: #fca5a5;
-      color: #fb4b5b;
     }
 
     .controls {
@@ -264,9 +261,11 @@
       button {
         padding: 10px 14px;
       }
+    }
 
-      .label {
-        font-size: 12px;
+    @media (prefers-reduced-motion: reduce) {
+      .particle {
+        display: none;
       }
     }
   </style>
@@ -280,8 +279,6 @@
   </header>
 
   <main>
-
-    <!-- INTRODUCTION -->
 
     <section class="intro">
       <h2>Welcome to the Human Heart</h2>
@@ -307,12 +304,12 @@
       </p>
 
       <iframe
-  class="model-frame"
-  title="Interactive 3D anatomical human heart model with model information controls"
-  src="https://sketchfab.com/models/5da08bb137014f0392c69f9997f777cd/embed?autostart=1&ui_theme=dark&ui_infos=1&ui_help=1&ui_settings=1"
-  allow="autoplay; fullscreen; xr-spatial-tracking"
-  allowfullscreen
-  loading="lazy">
+        class="model-frame"
+        title="Interactive 3D anatomical human heart model"
+        src="https://sketchfab.com/models/5da08bb137014f0392c69f9997f777cd/embed?autostart=1&ui_theme=dark&ui_infos=0"
+        allow="autoplay; fullscreen; xr-spatial-tracking"
+        allowfullscreen
+        loading="lazy">
       </iframe>
 
       <p class="note">
@@ -327,8 +324,8 @@
       <h2>2. Animated Blood Circulation</h2>
 
       <p>
-        Follow the moving particles to see how blood travels between
-        the body, the heart, and the lungs.
+        Watch the blue and red particles travel through the heart,
+        lungs, and body.
       </p>
 
       <div class="legend">
@@ -342,9 +339,33 @@
           id="circulationDiagram"
           viewBox="0 0 600 460"
           role="img"
-          aria-label="Animated diagram of blood circulation through the heart, lungs, and body">
+          aria-label="Animated schematic showing blood circulation through the body, heart, and lungs">
 
-          <!-- BODY AND LUNGS -->
+          <defs>
+
+            <marker
+              id="blueArrow"
+              markerWidth="8"
+              markerHeight="8"
+              refX="5"
+              refY="3"
+              orient="auto">
+              <path d="M0,0 L0,6 L6,3 z" fill="#38bdf8"/>
+            </marker>
+
+            <marker
+              id="redArrow"
+              markerWidth="8"
+              markerHeight="8"
+              refX="5"
+              refY="3"
+              orient="auto">
+              <path d="M0,0 L0,6 L6,3 z" fill="#fb4b5b"/>
+            </marker>
+
+          </defs>
+
+          <!-- BODY -->
 
           <rect
             x="20" y="25"
@@ -361,6 +382,8 @@
             Uses oxygen
           </text>
 
+          <!-- LUNGS -->
+
           <rect
             x="430" y="25"
             width="150" height="65"
@@ -376,31 +399,47 @@
             Adds oxygen
           </text>
 
-          <!-- BLOOD VESSELS -->
+          <!-- BLUE PATH: BODY TO RIGHT ATRIUM -->
 
           <path
             class="vessel blue-path"
-            d="M95 90 V150 H210"/>
+            d="M95 90 V150 H210"
+            marker-end="url(#blueArrow)"/>
+
+          <!-- BLUE PATH: RIGHT ATRIUM TO RIGHT VENTRICLE -->
 
           <path
             class="vessel blue-path"
-            d="M210 195 V245"/>
+            d="M210 195 V245"
+            marker-end="url(#blueArrow)"/>
+
+          <!-- BLUE PATH: RIGHT VENTRICLE TO LUNGS -->
 
           <path
             class="vessel blue-path"
-            d="M210 315 V345 H350 V115 H505 V90"/>
+            d="M210 315 V345 H350 V115 H505 V90"
+            marker-end="url(#blueArrow)"/>
+
+          <!-- RED PATH: LUNGS TO LEFT ATRIUM -->
 
           <path
             class="vessel red-path"
-            d="M505 90 V150 H390"/>
+            d="M505 90 V150 H390"
+            marker-end="url(#redArrow)"/>
+
+          <!-- RED PATH: LEFT ATRIUM TO LEFT VENTRICLE -->
 
           <path
             class="vessel red-path"
-            d="M390 195 V245"/>
+            d="M390 195 V245"
+            marker-end="url(#redArrow)"/>
+
+          <!-- RED PATH: LEFT VENTRICLE TO BODY -->
 
           <path
             class="vessel red-path"
-            d="M390 315 V375 H555 V12 H95 V25"/>
+            d="M390 315 V375 H555 V12 H95 V25"
+            marker-end="url(#redArrow)"/>
 
           <!-- RIGHT ATRIUM -->
 
@@ -484,9 +523,63 @@
             Aorta
           </text>
 
-          <!-- ANIMATED PARTICLES ARE INSERTED HERE BY JAVASCRIPT -->
+          <!-- BLUE PARTICLE: BODY TO RIGHT ATRIUM -->
 
-          <g id="particleLayer"></g>
+          <circle r="7" class="particle blue-particle">
+            <animateMotion
+              dur="4s"
+              repeatCount="indefinite"
+              path="M95 90 V150 H210"/>
+          </circle>
+
+          <!-- BLUE PARTICLE: RIGHT ATRIUM TO RIGHT VENTRICLE -->
+
+          <circle r="7" class="particle blue-particle">
+            <animateMotion
+              dur="3s"
+              begin="-1s"
+              repeatCount="indefinite"
+              path="M210 195 V245"/>
+          </circle>
+
+          <!-- BLUE PARTICLE: RIGHT VENTRICLE TO LUNGS -->
+
+          <circle r="7" class="particle blue-particle">
+            <animateMotion
+              dur="5s"
+              begin="-2s"
+              repeatCount="indefinite"
+              path="M210 315 V345 H350 V115 H505 V90"/>
+          </circle>
+
+          <!-- RED PARTICLE: LUNGS TO LEFT ATRIUM -->
+
+          <circle r="7" class="particle red-particle">
+            <animateMotion
+              dur="4s"
+              repeatCount="indefinite"
+              path="M505 90 V150 H390"/>
+          </circle>
+
+          <!-- RED PARTICLE: LEFT ATRIUM TO LEFT VENTRICLE -->
+
+          <circle r="7" class="particle red-particle">
+            <animateMotion
+              dur="3s"
+              begin="-1s"
+              repeatCount="indefinite"
+              path="M390 195 V245"/>
+          </circle>
+
+          <!-- RED PARTICLE: LEFT VENTRICLE TO BODY -->
+
+          <circle r="7" class="particle red-particle">
+            <animateMotion
+              dur="5s"
+              begin="-2s"
+              repeatCount="indefinite"
+              path="M390 315 V375 H555 V12 H95 V25"/>
+          </circle>
 
           <text x="300" y="420" text-anchor="middle" class="label">
             Follow the moving blood particles
@@ -513,6 +606,7 @@
       </div>
 
       <div id="stage" aria-live="polite">
+        <strong>Blood circulation:</strong>
         Blood continuously travels between the heart, lungs, and body.
       </div>
 
@@ -527,62 +621,88 @@
 
         <div class="part">
           <h3>Superior vena cava</h3>
-          <p>Carries low-oxygen blood from the upper body to the right atrium.</p>
+          <p>
+            Carries low-oxygen blood from the upper body to the right atrium.
+          </p>
         </div>
 
         <div class="part">
           <h3>Inferior vena cava</h3>
-          <p>Carries low-oxygen blood from the lower body to the right atrium.</p>
+          <p>
+            Carries low-oxygen blood from the lower body to the right atrium.
+          </p>
         </div>
 
         <div class="part">
           <h3>Right atrium</h3>
-          <p>Receives low-oxygen blood returning from the body.</p>
+          <p>
+            Receives low-oxygen blood returning from the body.
+          </p>
         </div>
 
         <div class="part">
           <h3>Right ventricle</h3>
-          <p>Pumps low-oxygen blood to the lungs through the pulmonary artery.</p>
+          <p>
+            Pumps low-oxygen blood to the lungs through the pulmonary artery.
+          </p>
         </div>
 
         <div class="part">
           <h3>Pulmonary artery</h3>
-          <p>Carries low-oxygen blood from the right ventricle to the lungs.</p>
+          <p>
+            Carries low-oxygen blood from the right ventricle to the lungs.
+          </p>
         </div>
 
         <div class="part">
           <h3>Pulmonary veins</h3>
-          <p>Carry oxygen-rich blood from the lungs to the left atrium.</p>
+          <p>
+            Carry oxygen-rich blood from the lungs to the left atrium.
+          </p>
         </div>
 
         <div class="part">
           <h3>Left atrium</h3>
-          <p>Receives oxygen-rich blood returning from the lungs.</p>
+          <p>
+            Receives oxygen-rich blood returning from the lungs.
+          </p>
         </div>
 
         <div class="part">
           <h3>Left ventricle</h3>
-          <p>Pumps oxygen-rich blood into the aorta and out to the body.</p>
+          <p>
+            Pumps oxygen-rich blood into the aorta and out to the body.
+          </p>
         </div>
 
         <div class="part">
           <h3>Aorta</h3>
-          <p>The main artery carrying oxygen-rich blood from the left ventricle to the body.</p>
+          <p>
+            The main artery carrying oxygen-rich blood from the left ventricle
+            to the body.
+          </p>
         </div>
 
         <div class="part">
           <h3>Septum</h3>
-          <p>The wall that separates the right and left sides of the heart.</p>
+          <p>
+            The wall that separates the right and left sides of the heart.
+          </p>
         </div>
 
         <div class="part">
           <h3>Heart valves</h3>
-          <p>Help keep blood flowing in the correct direction through the heart.</p>
+          <p>
+            Help keep blood flowing in the correct direction through the heart.
+          </p>
         </div>
 
         <div class="part">
           <h3>Capillaries</h3>
-          <p>Tiny blood vessels where oxygen and other substances are exchanged with body tissues.</p>
+          <p>
+            Tiny blood vessels where oxygen and other substances are exchanged
+            with body tissues.
+          </p>
         </div>
 
       </div>
@@ -594,13 +714,36 @@
       <h2>4. How Blood Circulates</h2>
 
       <ol>
-        <li>Blood low in oxygen returns from the body through the superior and inferior venae cavae to the right atrium.</li>
-        <li>Blood passes through the tricuspid valve into the right ventricle.</li>
-        <li>The right ventricle pumps blood through the pulmonary valve and pulmonary artery to the lungs.</li>
-        <li>In the lungs, blood releases carbon dioxide and receives oxygen.</li>
-        <li>Oxygen-rich blood returns through the pulmonary veins to the left atrium.</li>
-        <li>Blood passes through the mitral valve into the left ventricle.</li>
-        <li>The left ventricle pumps blood through the aortic valve and aorta to the rest of the body.</li>
+        <li>
+          Blood low in oxygen returns from the body through the superior and
+          inferior venae cavae to the right atrium.
+        </li>
+
+        <li>
+          Blood passes through the tricuspid valve into the right ventricle.
+        </li>
+
+        <li>
+          The right ventricle pumps blood through the pulmonary valve and
+          pulmonary artery to the lungs.
+        </li>
+
+        <li>
+          In the lungs, blood releases carbon dioxide and receives oxygen.
+        </li>
+
+        <li>
+          Oxygen-rich blood returns through the pulmonary veins to the left atrium.
+        </li>
+
+        <li>
+          Blood passes through the mitral valve into the left ventricle.
+        </li>
+
+        <li>
+          The left ventricle pumps blood through the aortic valve and aorta
+          to the rest of the body.
+        </li>
       </ol>
     </section>
 
@@ -625,231 +768,95 @@
   </footer>
 
   <script>
-    (() => {
-      const svg = document.getElementById("circulationDiagram");
-      const particleLayer = document.getElementById("particleLayer");
-      const pauseButton = document.getElementById("pauseButton");
-      const restartButton = document.getElementById("restartButton");
-      const stage = document.getElementById("stage");
+    const svg = document.getElementById("circulationDiagram");
+    const pauseButton = document.getElementById("pauseButton");
+    const restartButton = document.getElementById("restartButton");
+    const stage = document.getElementById("stage");
 
-      const SVG_NS = "http://www.w3.org/2000/svg";
+    const stages = [
+      "Step 1: 🔵 Blood returns from the body through the venae cavae to the right atrium.",
+      "Step 2: 🔵 Blood moves from the right atrium into the right ventricle.",
+      "Step 3: 🔵 The right ventricle pumps blood through the pulmonary artery to the lungs.",
+      "Step 4: 🫁 In the lungs, blood releases carbon dioxide and receives oxygen.",
+      "Step 5: 🔴 Oxygen-rich blood returns through the pulmonary veins to the left atrium.",
+      "Step 6: 🔴 Blood enters the left ventricle and is pumped through the aorta to the body."
+    ];
 
-      /*
-        Each particle follows a complete, visible segment of circulation.
-        JavaScript calculates particle positions, avoiding dependence
-        on SVG animateMotion support.
-      */
+    let paused = false;
+    let currentStage = 0;
+    let stageTimer = null;
 
-      const routes = [
-        {
-          color: "blue",
-          points: [
-            [95, 90],
-            [95, 150],
-            [210, 150],
-            [210, 195],
-            [210, 245],
-            [210, 315],
-            [210, 345],
-            [350, 345],
-            [350, 115],
-            [505, 115],
-            [505, 90]
-          ],
-          duration: 9000,
-          count: 5
-        },
-        {
-          color: "red",
-          points: [
-            [505, 90],
-            [505, 150],
-            [390, 150],
-            [390, 195],
-            [390, 245],
-            [390, 315],
-            [390, 375],
-            [555, 375],
-            [555, 12],
-            [95, 12],
-            [95, 25]
-          ],
-          duration: 10000,
-          count: 5
-        }
-      ];
+    function showStage() {
+      stage.textContent = stages[currentStage];
+    }
 
-      const stages = [
-        "Step 1: 🔵 Blood returns from the body to the right atrium.",
-        "Step 2: 🔵 Blood passes from the right atrium into the right ventricle.",
-        "Step 3: 🔵 The right ventricle pumps blood toward the lungs.",
-        "Step 4: 🫁 In the lungs, blood releases carbon dioxide and receives oxygen.",
-        "Step 5: 🔴 Oxygen-rich blood returns to the left atrium.",
-        "Step 6: 🔴 The left ventricle pumps oxygen-rich blood toward the body."
-      ];
+    function startStageTimer() {
+      clearInterval(stageTimer);
 
-      let paused = false;
-      let currentStage = 0;
-      let elapsed = 0;
-      let previousTimestamp = null;
-      let stageElapsed = 0;
-      let animationFrame = null;
-      let particles = [];
-
-      function createParticle(route, index) {
-        const circle = document.createElementNS(SVG_NS, "circle");
-
-        circle.setAttribute("r", index % 2 === 0 ? "6.5" : "5");
-        circle.setAttribute("class", "particle " + route.color + "-particle");
-
-        particleLayer.appendChild(circle);
-
-        return {
-          circle,
-          route,
-          offset: index / route.count
-        };
-      }
-
-      function getPointOnRoute(points, progress) {
-        const segments = [];
-        let totalLength = 0;
-
-        for (let i = 0; i < points.length - 1; i++) {
-          const x1 = points[i][0];
-          const y1 = points[i][1];
-          const x2 = points[i + 1][0];
-          const y2 = points[i + 1][1];
-
-          const length = Math.hypot(x2 - x1, y2 - y1);
-
-          segments.push({
-            x1, y1, x2, y2, length,
-            start: totalLength
-          });
-
-          totalLength += length;
-        }
-
-        let distance = ((progress % 1) + 1) % 1 * totalLength;
-
-        for (const segment of segments) {
-          if (distance <= segment.length) {
-            const fraction = segment.length === 0
-              ? 0
-              : distance / segment.length;
-
-            return {
-              x: segment.x1 + (segment.x2 - segment.x1) * fraction,
-              y: segment.y1 + (segment.y2 - segment.y1) * fraction
-            };
-          }
-
-          distance -= segment.length;
-        }
-
-        const last = points[points.length - 1];
-
-        return { x: last[0], y: last[1] };
-      }
-
-      function updateParticles(deltaTime) {
-        for (const particle of particles) {
-          const progress =
-            elapsed / particle.route.duration + particle.offset;
-
-          const point = getPointOnRoute(
-            particle.route.points,
-            progress
-          );
-
-          particle.circle.setAttribute("cx", point.x);
-          particle.circle.setAttribute("cy", point.y);
-        }
-      }
-
-      function showStage() {
-        stage.textContent = stages[currentStage];
-      }
-
-      function animationLoop(timestamp) {
-        if (previousTimestamp === null) {
-          previousTimestamp = timestamp;
-        }
-
-        const deltaTime = Math.min(timestamp - previousTimestamp, 50);
-        previousTimestamp = timestamp;
-
+      stageTimer = setInterval(() => {
         if (!paused) {
-          elapsed += deltaTime;
-          stageElapsed += deltaTime;
-
-          if (stageElapsed >= 4000) {
-            stageElapsed %= 4000;
-            currentStage = (currentStage + 1) % stages.length;
-            showStage();
-          }
-
-          updateParticles(deltaTime);
+          currentStage = (currentStage + 1) % stages.length;
+          showStage();
         }
+      }, 4000);
+    }
 
-        animationFrame = requestAnimationFrame(animationLoop);
+    function pauseAnimation() {
+      if (paused) return;
+
+      paused = true;
+
+      if (typeof svg.pauseAnimations === "function") {
+        svg.pauseAnimations();
       }
 
-      function pauseAnimation() {
-        if (paused) return;
+      pauseButton.textContent = "▶ Resume Animation";
+      stage.textContent = "Animation paused. Press Resume to continue.";
+    }
 
-        paused = true;
-        pauseButton.textContent = "▶ Resume Animation";
-        stage.textContent = "Animation paused. Press Resume to continue.";
+    function resumeAnimation() {
+      if (!paused) return;
+
+      paused = false;
+
+      if (typeof svg.unpauseAnimations === "function") {
+        svg.unpauseAnimations();
       }
 
-      function resumeAnimation() {
-        if (!paused) return;
+      pauseButton.textContent = "⏸ Pause Animation";
+      showStage();
+    }
 
-        paused = false;
-        pauseButton.textContent = "⏸ Pause Animation";
-        showStage();
+    function restartAnimation() {
+      paused = false;
+      currentStage = 0;
+
+      if (typeof svg.setCurrentTime === "function") {
+        svg.setCurrentTime(0);
       }
 
-      function restartAnimation() {
-        paused = false;
-        elapsed = 0;
-        stageElapsed = 0;
-        currentStage = 0;
-        previousTimestamp = null;
-
-        pauseButton.textContent = "⏸ Pause Animation";
-
-        showStage();
-        updateParticles(0);
+      if (typeof svg.unpauseAnimations === "function") {
+        svg.unpauseAnimations();
       }
 
-      function initialize() {
-        for (const route of routes) {
-          for (let i = 0; i < route.count; i++) {
-            particles.push(createParticle(route, i));
-          }
-        }
+      pauseButton.textContent = "⏸ Pause Animation";
 
-        updateParticles(0);
-        showStage();
+      showStage();
+      startStageTimer();
+    }
 
-        pauseButton.addEventListener("click", () => {
-          if (paused) {
-            resumeAnimation();
-          } else {
-            pauseAnimation();
-          }
-        });
-
-        restartButton.addEventListener("click", restartAnimation);
-
-        animationFrame = requestAnimationFrame(animationLoop);
+    pauseButton.addEventListener("click", () => {
+      if (paused) {
+        resumeAnimation();
+      } else {
+        pauseAnimation();
       }
+    });
 
-      initialize()
-})();
+    restartButton.addEventListener("click", restartAnimation);
+
+    showStage();
+    startStageTimer();
   </script>
 
 </body>
