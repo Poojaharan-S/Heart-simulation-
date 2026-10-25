@@ -894,13 +894,13 @@ footer {
   }
 
   initializeSketchfab();
-
   /*
   ========================================================
   ANIMATED BLOOD CIRCULATION
   ========================================================
   */
 
+  const circulationDiagram = document.getElementById("circulationDiagram");
   const particleLayer = document.getElementById("particleLayer");
   const pauseButton = document.getElementById("pauseButton");
   const restartButton = document.getElementById("restartButton");
@@ -948,9 +948,13 @@ footer {
   ];
 
   let paused = false;
+  let animationStarted = false;
 
-  function createPath(route) {
+  // Create a hidden SVG path for each blood-flow route.
+  function createPath(route, routeIndex) {
     const path = document.createElementNS(SVG_NS, "path");
+
+    path.id = `bloodRoute${routeIndex}`;
 
     const pathData = route.points
       .map((point, index) => {
@@ -966,16 +970,21 @@ footer {
     return path;
   }
 
+  // Create a particle that moves along its assigned route.
   function createParticle(route, path, delay) {
     const particle = document.createElementNS(SVG_NS, "circle");
 
     particle.setAttribute("r", "5");
-    particle.setAttribute("fill", route.color);
-    particle.setAttribute("class", "blood-particle");
+    particle.setAttribute("class", "particle");
 
-    particleLayer.appendChild(particle);
+    if (route.color === "blue") {
+      particle.classList.add("blue-particle");
+    } else {
+      particle.classList.add("red-particle");
+    }
 
     const motion = document.createElementNS(SVG_NS, "animateMotion");
+
     motion.setAttribute("dur", `${route.duration}ms`);
     motion.setAttribute("repeatCount", "indefinite");
     motion.setAttribute("begin", `${delay}ms`);
@@ -987,86 +996,103 @@ footer {
     motion.appendChild(motionPath);
     particle.appendChild(motion);
 
+    particleLayer.appendChild(particle);
+
     return particle;
   }
-    function startBloodCirculation() {
-    if (!particleLayer) {
-      console.error("Could not find #particleLayer.");
-      return;
-    }
 
+  // Build the blood-flow paths and particles.
+  function buildBloodCirculation() {
     particleLayer.innerHTML = "";
 
     routes.forEach((route, routeIndex) => {
-      const path = createPath(route);
-      path.id = `bloodRoute${routeIndex}`;
+      const path = createPath(route, routeIndex);
 
-      stage.appendChild(path);
+      // Keep the route and its particles together in the SVG.
+      particleLayer.appendChild(path);
 
       for (let i = 0; i < route.count; i++) {
         const delay = (route.duration / route.count) * i;
+
         createParticle(route, path, delay);
       }
     });
-
-    if (paused) {
-      pauseBloodCirculation();
-    }
   }
 
+  // Pause every SVG animation in the circulation diagram.
   function pauseBloodCirculation() {
+    if (!circulationDiagram) return;
+
+    circulationDiagram.pauseAnimations();
     paused = true;
 
-    if (stage) {
-      stage.pauseAnimations();
-    }
-
-    if (pauseButton) {
-      pauseButton.textContent = "Resume";
-    }
+    pauseButton.textContent = "▶ Resume Animation";
+    stage.textContent = "Blood circulation animation is paused.";
   }
 
+  // Resume the SVG animation from its paused position.
   function resumeBloodCirculation() {
+    if (!circulationDiagram) return;
+
+    circulationDiagram.unpauseAnimations();
     paused = false;
 
-    if (stage) {
-      stage.unpauseAnimations();
-    }
-
-    if (pauseButton) {
-      pauseButton.textContent = "Pause";
-    }
+    pauseButton.textContent = "⏸ Pause Animation";
+    stage.textContent =
+      "Blood is moving through the heart, lungs, and body.";
   }
 
+  // Restart the animation from the beginning without duplicating paths.
   function restartBloodCirculation() {
+    if (!circulationDiagram || !particleLayer) return;
+
+    // Stop the current animation.
+    circulationDiagram.pauseAnimations();
+
+    // Reset the SVG animation clock.
+    circulationDiagram.setCurrentTime(0);
+
+    // Rebuild the particles and paths from scratch.
+    buildBloodCirculation();
+
+    // Start again from the beginning.
+    circulationDiagram.setCurrentTime(0);
+    circulationDiagram.unpauseAnimations();
+
     paused = false;
-    startBloodCirculation();
+    animationStarted = true;
 
-    if (stage) {
-      stage.setCurrentTime(0);
-      stage.unpauseAnimations();
+    pauseButton.textContent = "⏸ Pause Animation";
+    stage.textContent =
+      "Animation restarted! Follow the blood as it travels through the heart, lungs, and body.";
+  }
+
+  // Pause/resume button.
+  pauseButton.addEventListener("click", () => {
+    if (paused) {
+      resumeBloodCirculation();
+    } else {
+      pauseBloodCirculation();
     }
+  });
 
-    if (pauseButton) {
-      pauseButton.textContent = "Pause";
-    }
+  // Restart button.
+  restartButton.addEventListener("click", restartBloodCirculation);
+
+  // Start the animation when the page loads.
+  buildBloodCirculation();
+
+  if (circulationDiagram) {
+    circulationDiagram.setCurrentTime(0);
+    circulationDiagram.unpauseAnimations();
+    animationStarted = true;
   }
 
-  if (pauseButton) {
-    pauseButton.addEventListener("click", () => {
-      if (paused) {
-        resumeBloodCirculation();
-      } else {
-        pauseBloodCirculation();
-      }
-    });
-  }
+  paused = false;
+  pauseButton.textContent = "⏸ Pause Animation";
 
-  if (restartButton) {
-    restartButton.addEventListener("click", restartBloodCirculation);
-  }
-
-  startBloodCirculation();
+  stage.textContent =
+    "Blood is moving through the heart, lungs, and body.";
 
 })(); // End of the main page script
 </script>
