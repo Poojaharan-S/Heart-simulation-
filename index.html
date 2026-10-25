@@ -517,8 +517,7 @@ footer {
       Blood continuously travels between the heart, lungs, and body.
     </div>
   </section>
-
-  <!-- HEART STRUCTURES -->
+    <!-- HEART STRUCTURES -->
 
   <section>
     <h2>4. Important Parts of the Heart</h2>
@@ -714,8 +713,7 @@ footer {
     clearSelection();
     setLabelStatus("Selection cancelled. Choose another structure when ready.");
   });
-
-  /*
+    /*
     Add a label at the position returned by Sketchfab's click event.
     The annotation is created in the model's 3D scene, not as a page overlay.
   */
@@ -834,244 +832,244 @@ footer {
 
     setTimeout(() => URL.revokeObjectURL(url), 1000);
 
-    setLabelStatus("Annotation coordinates exported as a JSON file."
-  );
-});
+    setLabelStatus("Annotation coordinates exported as a JSON file.");
+  });
 
-function initializeSketchfab() {
-  if (!window.Sketchfab) {
-    modelLoading.textContent =
-      "The Sketchfab API did not load. Check your internet connection.";
+  function initializeSketchfab() {
+    if (!window.Sketchfab) {
+      modelLoading.textContent =
+        "The Sketchfab API did not load. Check your internet connection.";
 
-    setLabelStatus("Could not load the Sketchfab Viewer API.");
-    return;
-  }
+      setLabelStatus("Could not load the Sketchfab Viewer API.");
+      return;
+    }
 
-  const client = new Sketchfab("1.12.1", frame);
+    const client = new Sketchfab("1.12.1", frame);
 
-  client.init(MODEL_UID, {
-    autostart: 1,
-    preload: 1,
-    ui_theme: "dark",
-    ui_infos: 1,
-    ui_help: 1,
-    ui_settings: 1,
-    annotations_visible: 1,
-    annotation_tooltip_visible: 1,
+    client.init(MODEL_UID, {
+      autostart: 1,
+      preload: 1,
+      ui_theme: "dark",
+      ui_infos: 1,
+      ui_help: 1,
+      ui_settings: 1,
+      annotations_visible: 1,
+      annotation_tooltip_visible: 1,
 
-    success: function(api) {
-      viewerApi = api;
+      success: function(api) {
+        viewerApi = api;
 
-      api.start(error => {
-        if (error) {
-          console.error("Viewer start error:", error);
-        }
-      });
+        api.start(error => {
+          if (error) {
+            console.error("Viewer start error:", error);
+          }
+        });
 
-      api.addEventListener("viewerready", () => {
-        viewerReady = true;
+        api.addEventListener("viewerready", () => {
+          viewerReady = true;
 
-        modelLoading.textContent = "3D heart model loaded.";
-        enableStructureButtons();
+          modelLoading.textContent = "3D heart model loaded.";
+          enableStructureButtons();
+
+          setLabelStatus(
+            "Viewer ready. Select an anatomical structure, then click its location on the heart."
+          );
+
+          api.addEventListener("click", info => {
+            if (!selectedStructure) return;
+            placeAnnotation(info);
+          }, { pick: "slow" });
+        });
+      },
+
+      error: function() {
+        modelLoading.textContent =
+          "The 3D viewer could not initialize. Refresh the page and try again.";
 
         setLabelStatus(
-          "Viewer ready. Select an anatomical structure, then click its location on the heart."
+          "Sketchfab initialization failed. Check the model URL, network connection, and browser console."
         );
+      }
+    });
+  }
 
-        api.addEventListener("click", info => {
-          if (!selectedStructure) return;
-          placeAnnotation(info);
-        }, { pick: "slow" });
-      });
-    },
+  initializeSketchfab();
 
-    error: function() {
-      modelLoading.textContent =
-        "The 3D viewer could not initialize. Refresh the page and try again.";
-
-      setLabelStatus(
-        "Sketchfab initialization failed. Check the model URL, network connection, and browser console."
-      );
-    }
-  });
-}
-
-initializeSketchfab();
   /*
-================================================
-    ANIMATED BLOOD CIRCULATION
-================================================
-*/
+  ========================================================
+  ANIMATED BLOOD CIRCULATION
+  ========================================================
+  */
 
-const particleLayer = document.getElementById("particleLayer");
-const pauseButton = document.getElementById("pauseButton");
-const restartButton = document.getElementById("restartButton");
-const stage = document.getElementById("stage");
+  const particleLayer = document.getElementById("particleLayer");
+  const pauseButton = document.getElementById("pauseButton");
+  const restartButton = document.getElementById("restartButton");
+  const stage = document.getElementById("stage");
 
-const SVG_NS = "http://www.w3.org/2000/svg";
+  const SVG_NS = "http://www.w3.org/2000/svg";
 
-const routes = [
-  {
-    color: "blue",
-    points: [
-      [95, 90],
-      [95, 150],
-      [210, 150],
-      [210, 195],
-      [210, 245],
-      [210, 315],
-      [210, 345],
-      [350, 345],
-      [350, 115],
-      [505, 115],
-      [505, 90]
-    ],
-    duration: 9000,
-    count: 5
-  },
-  {
-    color: "red",
-    points: [
-      [505, 90],
-      [505, 150],
-      [390, 150],
-      [390, 195],
-      [390, 245],
-      [390, 315],
-      [390, 375],
-      [555, 375],
-      [555, 12],
-      [95, 12],
-      [95, 25]
-    ],
-    duration: 10000,
-    count: 5
-  }
-];
-
-let paused = false;
-let animationTimers = [];
-
-function createPath(route) {
-  const path = document.createElementNS(SVG_NS, "path");
-
-  const pathData = route.points
-    .map((point, index) => {
-      return `${index === 0 ? "M" : "L"} ${point[0]} ${point[1]}`;
-    })
-    .join(" ");
-
-  path.setAttribute("d", pathData);
-  path.setAttribute("fill", "none");
-  path.setAttribute("stroke", "transparent");
-  path.setAttribute("stroke-width", "2");
-
-  return path;
-}
-
-function createParticle(route, path, delay) {
-  const particle = document.createElementNS(SVG_NS, "circle");
-
-  particle.setAttribute("r", "5");
-  particle.setAttribute("fill", route.color);
-  particle.setAttribute("class", "blood-particle");
-
-  particleLayer.appendChild(particle);
-
-  const motion = document.createElementNS(SVG_NS, "animateMotion");
-  motion.setAttribute("dur", `${route.duration}ms`);
-  motion.setAttribute("repeatCount", "indefinite");
-  motion.setAttribute("begin", `${delay}ms`);
-  motion.setAttribute("rotate", "auto");
-
-  const motionPath = document.createElementNS(SVG_NS, "mpath");
-  motionPath.setAttribute("href", `#${path.id}`);
-
-  motion.appendChild(motionPath);
-  particle.appendChild(motion);
-
-  return particle;
-}
-
-function startBloodCirculation() {
-  if (!particleLayer) {
-    console.error("Could not find #particleLayer.");
-    return;
-  }
-
-  particleLayer.innerHTML = "";
-
-  routes.forEach((route, routeIndex) => {
-    const path = createPath(route);
-    path.id = `bloodRoute${routeIndex}`;
-
-    stage.appendChild(path);
-
-    for (let i = 0; i < route.count; i++) {
-      const delay = (route.duration / route.count) * i;
-      createParticle(route, path, delay);
+  const routes = [
+    {
+      color: "blue",
+      points: [
+        [95, 90],
+        [95, 150],
+        [210, 150],
+        [210, 195],
+        [210, 245],
+        [210, 315],
+        [210, 345],
+        [350, 345],
+        [350, 115],
+        [505, 115],
+        [505, 90]
+      ],
+      duration: 9000,
+      count: 5
+    },
+    {
+      color: "red",
+      points: [
+        [505, 90],
+        [505, 150],
+        [390, 150],
+        [390, 195],
+        [390, 245],
+        [390, 315],
+        [390, 375],
+        [555, 375],
+        [555, 12],
+        [95, 12],
+        [95, 25]
+      ],
+      duration: 10000,
+      count: 5
     }
-  });
+  ];
 
-  if (paused) {
-    pauseBloodCirculation();
-  }
-}
+  let paused = false;
 
-function pauseBloodCirculation() {
-  paused = true;
+  function createPath(route) {
+    const path = document.createElementNS(SVG_NS, "path");
 
-  if (stage) {
-    stage.pauseAnimations();
-  }
+    const pathData = route.points
+      .map((point, index) => {
+        return `${index === 0 ? "M" : "L"} ${point[0]} ${point[1]}`;
+      })
+      .join(" ");
 
-  if (pauseButton) {
-    pauseButton.textContent = "Resume";
-  }
-}
+    path.setAttribute("d", pathData);
+    path.setAttribute("fill", "none");
+    path.setAttribute("stroke", "transparent");
+    path.setAttribute("stroke-width", "2");
 
-function resumeBloodCirculation() {
-  paused = false;
-
-  if (stage) {
-    stage.unpauseAnimations();
+    return path;
   }
 
-  if (pauseButton) {
-    pauseButton.textContent = "Pause";
+  function createParticle(route, path, delay) {
+    const particle = document.createElementNS(SVG_NS, "circle");
+
+    particle.setAttribute("r", "5");
+    particle.setAttribute("fill", route.color);
+    particle.setAttribute("class", "blood-particle");
+
+    particleLayer.appendChild(particle);
+
+    const motion = document.createElementNS(SVG_NS, "animateMotion");
+    motion.setAttribute("dur", `${route.duration}ms`);
+    motion.setAttribute("repeatCount", "indefinite");
+    motion.setAttribute("begin", `${delay}ms`);
+    motion.setAttribute("rotate", "auto");
+
+    const motionPath = document.createElementNS(SVG_NS, "mpath");
+    motionPath.setAttribute("href", `#${path.id}`);
+
+    motion.appendChild(motionPath);
+    particle.appendChild(motion);
+
+    return particle;
   }
-}
+    function startBloodCirculation() {
+    if (!particleLayer) {
+      console.error("Could not find #particleLayer.");
+      return;
+    }
 
-function restartBloodCirculation() {
-  paused = false;
-  startBloodCirculation();
+    particleLayer.innerHTML = "";
 
-  if (stage) {
-    stage.setCurrentTime(0);
-    stage.unpauseAnimations();
-  }
+    routes.forEach((route, routeIndex) => {
+      const path = createPath(route);
+      path.id = `bloodRoute${routeIndex}`;
 
-  if (pauseButton) {
-    pauseButton.textContent = "Pause";
-  }
-}
+      stage.appendChild(path);
 
-if (pauseButton) {
-  pauseButton.addEventListener("click", () => {
+      for (let i = 0; i < route.count; i++) {
+        const delay = (route.duration / route.count) * i;
+        createParticle(route, path, delay);
+      }
+    });
+
     if (paused) {
-      resumeBloodCirculation();
-    } else {
       pauseBloodCirculation();
     }
-  });
-}
+  }
 
-if (restartButton) {
-  restartButton.addEventListener("click", restartBloodCirculation);
-}
+  function pauseBloodCirculation() {
+    paused = true;
 
-startBloodCirculation();
-  </script>
+    if (stage) {
+      stage.pauseAnimations();
+    }
+
+    if (pauseButton) {
+      pauseButton.textContent = "Resume";
+    }
+  }
+
+  function resumeBloodCirculation() {
+    paused = false;
+
+    if (stage) {
+      stage.unpauseAnimations();
+    }
+
+    if (pauseButton) {
+      pauseButton.textContent = "Pause";
+    }
+  }
+
+  function restartBloodCirculation() {
+    paused = false;
+    startBloodCirculation();
+
+    if (stage) {
+      stage.setCurrentTime(0);
+      stage.unpauseAnimations();
+    }
+
+    if (pauseButton) {
+      pauseButton.textContent = "Pause";
+    }
+  }
+
+  if (pauseButton) {
+    pauseButton.addEventListener("click", () => {
+      if (paused) {
+        resumeBloodCirculation();
+      } else {
+        pauseBloodCirculation();
+      }
+    });
+  }
+
+  if (restartButton) {
+    restartButton.addEventListener("click", restartBloodCirculation);
+  }
+
+  startBloodCirculation();
+
+})(); // End of the main page script
+</script>
 
 </body>
 </html>
